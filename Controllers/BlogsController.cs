@@ -32,7 +32,7 @@ namespace BlogHosting.Controllers
 		// GET: Blogs
 		public async Task<IActionResult> Index()
         {
-            return View(await _context.Blog.ToListAsync());
+            return View(await _context.Blog.Include(m => m.Author).OrderByDescending(m => m.CreatedDateTime).ToListAsync());
         }
 
         // GET: Blogs/Details/5

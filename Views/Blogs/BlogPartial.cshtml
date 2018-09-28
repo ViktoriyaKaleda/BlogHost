@@ -1,0 +1,15 @@
+﻿@model BlogH.Models.Blog
+
+<div class="grid">
+    <div class="entry-media">
+        <img src="~/images/slider-1.jpg" alt="">
+    </div>
+    <div class="entry-body">
+        <span class="cat">@Model.Author.UserName</span>
+        <h3><a asp-action="Details" asp-controller="Blogs" asp-route-id="@Model.BlogId">@Model.BlogName</a></h3>
+        <p>@(Model.Description.Length < 90 ? Model.Description : Model.Description.Substring(0, 90) + "...")</p>
+        <div class="read-more-date">
+            <a asp-action="Details" asp-controller="Blogs" asp-route-id="@Model.BlogId">Read More..</a>
+        </div>
+    </div>
+</div>

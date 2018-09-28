@@ -1,0 +1,23 @@
+﻿@model BlogH.Models.Post
+
+<div class="grid">
+    <div class="entry-media">
+        <img src="~/images/slider-1.jpg" alt="">
+    </div>
+    <div class="entry-body">
+        <span class="cat">@Model.Author.UserName</span>
+        <h3><a asp-action="Details" asp-controller="Posts" asp-route-id="@Model.PostId">@Model.Title</a></h3>
+        <p>@(Model.Text.Length < 50 ? Model.Text : Model.Text.Substring(0, 50) + "...")</p>
+        <div class="read-more-date">
+            <a asp-action="Details" asp-controller="Posts" asp-route-id="@Model.PostId">Read More..</a>
+            <span class="date">@Model.CreatedDateTime.ToShortDateString() at @Model.CreatedDateTime.ToShortTimeString()</span>
+
+        </div>
+        <br />
+        <ul class="post-footer">
+            <li><a href="#"><i class="fas fa-heart"></i>@(Model.Likes?.Count ?? 0)</a></li>
+            <li><a href="#"><i class="fas fa-comment"></i>@(Model.Comments?.Count ?? 0)</a></li>
+        </ul>
+
+    </div>
+</div>

@@ -1,0 +1,70 @@
+ul, li {
+    margin: 0;
+    padding: 0;
+    font-weight: 300;
+    display: inline-block;
+    list-style: none;
+}
+
+a, button {
+    display: inline-block;
+    text-decoration: none;
+    color: inherit;
+    transition: all .3s;
+}
+
+    a:focus, a:active, a:hover,
+    button:focus, button:active, button:hover {
+        text-decoration: none;
+        color: #498BF9;
+    }
+   
+
+    ul.tags > li > a {
+        padding: 7px 10px;
+        margin-right: 10px;
+        float: left;
+        border: 1px solid #ddd;
+        background: #ddd;
+    }
+
+ul.tags > li > a:hover{ background: none; }
+
+
+/* ICONS */
+
+.post-icons-area{ margin: 30px 0; padding: 30px 0; overflow: hidden; 
+	border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+
+ul.post-icons{ float: left; }
+
+ul.post-icons > li > a{ padding-right: 15px; }
+
+ul.post-icons > li > a > i{ padding-right: 10px; font-size: 1.1em; opacity: .5; }
+
+ul.icons{ float: right; }
+
+ul.icons > li > a > i{ padding-left: 15px; font-size: 1.1em; opacity: .5; }
+
+.post-footer > li {
+    border-right: 5px solid #fff;
+}
+
+.post-footer > li > a {
+    line-height: 25px;
+    width: 100%;
+}
+
+    .post-footer i {
+        display: inline-block;
+        margin-right: 10px;
+        opacity: .6;
+        font-size: 1.1em;
+    }
+
+.commnets-area {
+    padding: 30px 40px;
+    margin: 30px 0;
+    overflow: hidden;
+    box-shadow: 0px 0px 5px rgba(0,0,0,.1);
+}

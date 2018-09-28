@@ -1,42 +1,37 @@
 ﻿@model BlogH.Models.Blog
-
 @{
     ViewData["Title"] = "Details";
 }
-
-<h2>Details</h2>
-
+<h2>
+    @Model.BlogName
+    <a asp-action="Edit" asp-route-id="@Model.BlogId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
+</h2>
 <div>
-    <h4>Blog</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.BlogName)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.BlogName)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.CreatedDateTime)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.CreatedDateTime)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.UpdatedDateTime)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.UpdatedDateTime)
-        </dd>
-    </dl>
+    <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.BlogId" class="btn btn-success">
+        <div class="row mt-1">
+            <div class="col-md-1">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="col-md-1">
+                <p>New post</p>
+            </div>
+        </div>
+    </a>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.BlogId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+@if (Model.Posts.Count == 0)
+{
+    <h3>This blog is empty</h3>
+}
+<div class="container">
+    <div class="row">
+        <div class="col col-xs-12">
+            <div class="blog-grids">
+                @foreach (var post in Model.Posts)
+                {
+                    <partial name="~/Views/Posts/PostPartial.cshtml" model="@post"/>
+                    @*@Html.Partial("~/Views/Posts/PostPartial.cshtml", post)*@
+                }
+            </div>
+        </div>
+    </div>
 </div>
