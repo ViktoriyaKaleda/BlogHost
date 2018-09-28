@@ -39,14 +39,15 @@ namespace BlogHosting.Controllers
         // GET: Posts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+			if (id == null)
+			{
+				return NotFound();
+			}
 
 			var post = await _context.Post
 				.Include(m => m.Comments).ThenInclude(m => m.Author)
 				.Include(m => m.Author)
+				.Include(m => m.Likes)
 				.SingleOrDefaultAsync(m => m.PostId == id);
 
 			if (post == null)
