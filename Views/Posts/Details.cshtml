@@ -29,15 +29,11 @@
                 <li><a href="#">Inspiration</a></li>
             </ul>
             <div class="post-icons-area">
-                <form asp-action="SetLike" asp-route-id="@Model.PostId">
-                    <button type="submit">CLICK</button>
-                </form>
                 <ul class="post-icons">
-
                     <li class="like">
-                        <a data-id="@Model.PostId">
-                            <i class="fas fa-heart"></i>
-                            <span class=".like-count">@(Model.Likes?.Count ?? 0)</span>
+                        <a id="likeButton" data-postId="@Model.PostId">
+                            <i id="iconTest" class="fas fa-heart"></i>
+                            <span id="likesNumber">@(Model.Likes?.Count ?? 0)</span>
                         </a>
                     </li>
                     <li><a href="#"><i class="fas fa-comment"></i>@(Model.Comments?.Count ?? 0)</a></li>
@@ -89,3 +85,5 @@
         </div>
     </div>
 </div>
+<script src="~/lib/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/setLike.js"></script>
