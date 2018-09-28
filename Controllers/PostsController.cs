@@ -46,7 +46,7 @@ namespace BlogHosting.Controllers
 
 			var post = await _context.Post
 				.Include(m => m.Comments).ThenInclude(m => m.Author)
-				.Include(m => m.Comments).ThenInclude(m => m.ChildComment).ThenInclude(m => m.Author)
+				.Include(m => m.Comments).ThenInclude(m => m.ChildComments).ThenInclude(m => m.Author)
 				.Include(m => m.Author)
 				.Include(m => m.Likes)
 				.SingleOrDefaultAsync(m => m.PostId == id);
@@ -87,10 +87,10 @@ namespace BlogHosting.Controllers
 
 					if (parentCommentId != null)
 					{
-						var parentComment = await _context.Comment.SingleOrDefaultAsync(m => m.CommentId == Int32.Parse(parentCommentId));
+						var parentComment = await _context.Comment.Include(m => m.ChildComments).SingleOrDefaultAsync(m => m.CommentId == Int32.Parse(parentCommentId));
 						if (parentComment != null)
 						{
-							parentComment.ChildComment = comment;
+							parentComment.ChildComments.Add(comment);
 							_context.Update(parentComment);
 						}
 					}
