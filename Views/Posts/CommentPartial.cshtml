@@ -1,0 +1,30 @@
+﻿@model BlogH.Models.Comment
+
+<div class="media mb-4 commnets-area">
+    <div class="media-left">
+        <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
+    </div>
+    <div class="media-body">
+        <h4 class="mt-0">
+            @Model.Author.UserName
+            <small>
+                <i>Posted on @Model.CreatedDate.ToShortDateString() at @Model.CreatedDate.ToShortTimeString()</i>
+            </small>
+        </h4>
+
+        @Model.Text
+    </div>
+
+    <div class="media-right">
+        <h5 class="reply-btn"><a id="replyButton" data-parentId="@Model.CommentId" data-username="@Model.Author.UserName"><b>REPLY</b></a></h5>
+    </div>
+
+    @if (Model.ChildComment != null)
+    {
+        foreach (var child in Model.ChildComments)
+        {
+            <partial name="~/Views/Posts/CommentPartial.cshtml" model="@child" />
+        }        
+    }
+</div>
+<br />

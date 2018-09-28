@@ -46,6 +46,7 @@ namespace BlogHosting.Controllers
 
 			var post = await _context.Post
 				.Include(m => m.Comments).ThenInclude(m => m.Author)
+				.Include(m => m.Comments).ThenInclude(m => m.ChildComment).ThenInclude(m => m.Author)
 				.Include(m => m.Author)
 				.Include(m => m.Likes)
 				.SingleOrDefaultAsync(m => m.PostId == id);
@@ -62,7 +63,7 @@ namespace BlogHosting.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> PostComment(int id, [Bind("Text")] Comment comment)
+		public async Task<IActionResult> PostComment(int id, [Bind("Text")] Comment comment, string parentCommentId)
 		{
 			id = (int)TempData["postId"];
 
@@ -81,7 +82,18 @@ namespace BlogHosting.Controllers
 					comment.Post = post;
 					comment.CreatedDate = DateTime.Now;
 					comment.UpdatedDate = comment.UpdatedDate;
+
 					_context.Add(comment);
+
+					if (parentCommentId != null)
+					{
+						var parentComment = await _context.Comment.SingleOrDefaultAsync(m => m.CommentId == Int32.Parse(parentCommentId));
+						if (parentComment != null)
+						{
+							parentComment.ChildComment = comment;
+							_context.Update(parentComment);
+						}
+					}
 
 					post.Comments.Add(comment);
 					_context.Update(post);

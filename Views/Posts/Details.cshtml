@@ -47,8 +47,9 @@
                     <form asp-action="PostComment">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="form-group">
-                            <textarea name="Text" class="form-control" rows="3"></textarea>
+                            <textarea id="commentText" name="Text" class="form-control" rows="3"></textarea>
                             <span asp-validation-for="Text" class="text-danger"></span>
+                            <input id="parentCommentId" name="parentCommentId" type="hidden" data-parentId="null" />
                         </div>
                         <button type="submit" class="btn btn-primary">Post comment</button>
                     </form>
@@ -61,25 +62,7 @@
                 <br />
                 foreach (var comment in Model?.Comments)
                 {
-                    <div class="media mb-4 commnets-area">
-                        <div class="media-left">
-                            <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                        </div>
-                        <div class="media-body">
-                            <h4 class="mt-0">
-                                @comment.Author.UserName
-                                <small>
-                                    <i>Posted on @comment.CreatedDate.ToShortDateString() at @comment.CreatedDate.ToShortTimeString()</i>
-                                </small>
-                            </h4>
-
-                            @comment.Text
-                        </div>
-                        <div class="media-right">
-                            <h5 class="reply-btn"><a href="#"><b>REPLY</b></a></h5>
-                        </div>
-                    </div>
-                    <br />
+                    @*<partial name="~/Views/Posts/CommentPartial.cshtml" model="@comment" />*@
                 }
             }
         </div>
@@ -87,3 +70,4 @@
 </div>
 <script src="~/lib/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/setLike.js"></script>
+<script src="~/js/showReply.js"></script>
