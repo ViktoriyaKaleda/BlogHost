@@ -10,6 +10,7 @@ using BlogHosting.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BlogHosting.Controllers
 {
@@ -61,8 +62,27 @@ namespace BlogHosting.Controllers
 			return View(post);
         }
 
+		private List<Comment> GetChildren(List<Comment> comments, int parentId)
+		{
+			return comments
+					.Where(m => m.ParentCommentId == parentId)
+					.Select(c => new Comment
+					{
+						CommentId = c.CommentId,
+						Text = c.Text,
+						Post = c.Post,
+						Author = c.Author,
+						CreatedDate = c.CreatedDate,
+						UpdatedDate = c.UpdatedDate,
+						ParentCommentId = c.ParentCommentId,
+						ChildComments = GetChildren(comments, c.CommentId)
+					})
+					.ToList();
+		}
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize]
 		public async Task<IActionResult> PostComment(int id, [Bind("Text")] Comment comment, string parentCommentId)
 		{
 			id = (int)TempData["postId"];
@@ -82,6 +102,8 @@ namespace BlogHosting.Controllers
 					comment.Post = post;
 					comment.CreatedDate = DateTime.Now;
 					comment.UpdatedDate = comment.UpdatedDate;
+					if (parentCommentId != null)
+						comment.ParentCommentId = Int32.Parse(parentCommentId);
 
 					_context.Add(comment);
 

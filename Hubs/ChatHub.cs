@@ -54,7 +54,7 @@ namespace SignalRChat.Hubs
 				likesNumber = _context.Like.Where(m => m.Post == post).Count();
 			}
 			
-			await Clients.All.SendAsync("setLike", likesNumber.ToString());
+			await Clients.All.SendAsync("setLike", likesNumber.ToString(), postId);
 		}
 	}
 }

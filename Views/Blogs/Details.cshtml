@@ -6,18 +6,9 @@
     @Model.BlogName
     <a asp-action="Edit" asp-route-id="@Model.BlogId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
 </h2>
-<div>
-    <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.BlogId" class="btn btn-success">
-        <div class="row mt-1">
-            <div class="col-md-1">
-                <i class="fas fa-plus"></i>
-            </div>
-            <div class="col-md-1">
-                <p>New post</p>
-            </div>
-        </div>
-    </a>
-</div>
+<p>
+    <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.BlogId">Create New Post</a>
+</p>
 @if (Model.Posts.Count == 0)
 {
     <h3>This blog is empty</h3>
@@ -28,7 +19,7 @@
             <div class="blog-grids">
                 @foreach (var post in Model.Posts)
                 {
-                    <partial name="~/Views/Posts/PostPartial.cshtml" model="@post"/>
+                    <partial name="~/Views/Posts/PostPartial.cshtml" model="@post" />
                     @*@Html.Partial("~/Views/Posts/PostPartial.cshtml", post)*@
                 }
             </div>

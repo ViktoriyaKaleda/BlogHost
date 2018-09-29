@@ -16,7 +16,7 @@
     </div>
 
     <div class="media-right">
-        <h5 class="reply-btn"><a class="replyButton" data-parentId="@Model.CommentId" data-username="@Model.Author.UserName"><b>REPLY</b></a></h5>
+        <h5 class="reply-btn"><a href="#!" class="replyButton" data-parentId="@Model.CommentId" data-username="@Model.Author.UserName"><b>REPLY</b></a></h5>
     </div>
 
     @if (Model.ChildComments != null)
@@ -24,7 +24,6 @@
         foreach (var child in Model.ChildComments)
         {
             <partial name="~/Views/Posts/CommentPartial.cshtml" model="@child" />
-        }        
+        }
     }
 </div>
-<br />
