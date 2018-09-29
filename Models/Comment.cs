@@ -20,6 +20,8 @@ namespace BlogH.Models
 
 		public DateTime UpdatedDate { get; set; }
 
-		public Comment ChildComment { get; set; }
+		public List<Comment> ChildComments { get; set; }
+
+		public int ParentCommentId { get; set; }
 	}
 }

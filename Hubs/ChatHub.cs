@@ -42,6 +42,7 @@ namespace SignalRChat.Hubs
 
 				likesNumber = _context.Like.Where(m => m.Post == post).Count();
 			}
+
 			else
 			{
 				post.Likes.Remove(like);
@@ -52,9 +53,8 @@ namespace SignalRChat.Hubs
 
 				likesNumber = _context.Like.Where(m => m.Post == post).Count();
 			}
-
-			//return Clients.All.updateLikeCount(likesNumber);
-			await Clients.All.SendAsync("setLike", likesNumber.ToString());
+			
+			await Clients.All.SendAsync("setLike", likesNumber.ToString(), postId);
 		}
 	}
 }

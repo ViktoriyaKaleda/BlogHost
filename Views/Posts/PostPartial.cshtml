@@ -15,8 +15,18 @@
         </div>
         <br />
         <ul class="post-footer">
-            <li><a href="#"><i class="fas fa-heart"></i>@(Model.Likes?.Count ?? 0)</a></li>
-            <li><a href="#"><i class="fas fa-comment"></i>@(Model.Comments?.Count ?? 0)</a></li>
+            <li>
+                <a href="#!" class="likeButton" data-postId="@Model.PostId">
+                    <like-icon post-id="@Model.PostId"></like-icon>
+                    <span id=@("likesNumber" + @Model.PostId)>@(Model.Likes?.Count ?? 0)</span>
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Posts" asp-action="Details" asp-fragment="comments" asp-route-id="@Model.PostId">
+                    <i class="fas fa-comment"></i>
+                    @(Model.Comments?.Count ?? 0)
+                </a>
+            </li>
         </ul>
 
     </div>

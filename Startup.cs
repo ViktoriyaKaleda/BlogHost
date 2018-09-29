@@ -13,6 +13,7 @@ using BlogHosting.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SignalRChat.Hubs;
+using BlogHosting.Hubs;
 
 namespace BlogHosting
 {
@@ -75,7 +76,12 @@ namespace BlogHosting
 
 			app.UseSignalR(routes =>
 			{
-				routes.MapHub<ChatHub>("/chatHub");
+				routes.MapHub<ChatHub>("/setLike");
+			});
+
+			app.UseSignalR(routes =>
+			{
+				routes.MapHub<CommentReplyHub>("/showReply");
 			});
 		}
 	}

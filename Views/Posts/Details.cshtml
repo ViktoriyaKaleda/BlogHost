@@ -31,12 +31,12 @@
             <div class="post-icons-area">
                 <ul class="post-icons">
                     <li class="like">
-                        <a id="likeButton" data-postId="@Model.PostId">
-                            <i id="iconTest" class="fas fa-heart"></i>
-                            <span id="likesNumber">@(Model.Likes?.Count ?? 0)</span>
+                        <a href="#!" class="likeButton" data-postId="@Model.PostId">
+                            <like-icon post-id="@Model.PostId"></like-icon>
+                            <span id=@("likesNumber" + @Model.PostId)>@(Model.Likes?.Count ?? 0)</span>
                         </a>
                     </li>
-                    <li><a href="#"><i class="fas fa-comment"></i>@(Model.Comments?.Count ?? 0)</a></li>
+                    <li><a href="#comments"><i class="fas fa-comment"></i>@(Model.Comments?.Count ?? 0)</a></li>
                 </ul>
             </div>
             <hr>
@@ -47,43 +47,84 @@
                     <form asp-action="PostComment">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="form-group">
-                            <textarea name="Text" class="form-control" rows="3"></textarea>
+                            <textarea id="commentText" name="Text" class="form-control" rows="3"></textarea>
                             <span asp-validation-for="Text" class="text-danger"></span>
+                            <input id="parentCommentId" name="parentCommentId" type="hidden" data-parentId="null" />
                         </div>
                         <button type="submit" class="btn btn-primary">Post comment</button>
                     </form>
                 </div>
             </div>
-            <h3>Comments(@($"{Model.Comments?.Count ?? 0}"))</h3>
+            <h3 id="comments">Comments(@($"{Model.Comments?.Count ?? 0}"))</h3>
 
             @if (Model.Comments?.Count > 0)
             {
                 <br />
-                foreach (var comment in Model?.Comments)
+                foreach (var comment in Model.Comments.Where(m => m.ParentCommentId == 0))
                 {
-                    <div class="media mb-4 commnets-area">
-                        <div class="media-left">
-                            <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                        </div>
-                        <div class="media-body">
-                            <h4 class="mt-0">
-                                @comment.Author.UserName
-                                <small>
-                                    <i>Posted on @comment.CreatedDate.ToShortDateString() at @comment.CreatedDate.ToShortTimeString()</i>
-                                </small>
-                            </h4>
-
-                            @comment.Text
-                        </div>
-                        <div class="media-right">
-                            <h5 class="reply-btn"><a href="#"><b>REPLY</b></a></h5>
-                        </div>
-                    </div>
-                    <br />
+                    <partial name="~/Views/Posts/CommentPartial.cshtml" model="@comment" />
                 }
             }
         </div>
+
+        <div class="col-md-4">
+
+            <!-- Search Widget -->
+            <div class="card my-4">
+                <h5 class="card-header">Search</h5>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search for...">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button">Go!</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Widget -->
+            <div class="card my-4">
+                <h5 class="card-header">Categories</h5>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <ul class="list-unstyled mb-0">
+                                <li>
+                                    <a href="#">Web Design</a>
+                                </li>
+                                <li>
+                                    <a href="#">HTML</a>
+                                </li>
+                                <li>
+                                    <a href="#">Freebies</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <ul class="list-unstyled mb-0">
+                                <li>
+                                    <a href="#">JavaScript</a>
+                                </li>
+                                <li>
+                                    <a href="#">CSS</a>
+                                </li>
+                                <li>
+                                    <a href="#">Tutorials</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Widget -->
+            <div class="card my-4">
+                <h5 class="card-header">Side Widget</h5>
+                <div class="card-body">
+                    You can put anything you want inside of these side widgets. They are easy to use, and feature the new Bootstrap 4 card containers!
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
-<script src="~/lib/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/setLike.js"></script>
