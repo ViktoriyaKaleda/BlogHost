@@ -1,33 +1,48 @@
-﻿@model BlogH.Models.Post
+﻿@model IEnumerable<BlogHosting.Models.PostViewModels.PostPreviewViewModel>
 
-<div class="grid">
-    <div class="entry-media">
-        <img src="~/images/slider-1.jpg" alt="">
-    </div>
-    <div class="entry-body">
-        <span class="cat">@Model.Author.UserName</span>
-        <h3><a asp-action="Details" asp-controller="Posts" asp-route-id="@Model.PostId">@Model.Title</a></h3>
-        <p>@(Model.Text.Length < 50 ? Model.Text : Model.Text.Substring(0, 50) + "...")</p>
-        <div class="read-more-date">
-            <a asp-action="Details" asp-controller="Posts" asp-route-id="@Model.PostId">Read More..</a>
-            <span class="date">@Model.CreatedDateTime.ToShortDateString() at @Model.CreatedDateTime.ToShortTimeString()</span>
+
+@foreach (var post in Model)
+{
+    <div class="grid">
+        <div class="entry-media">
+            <img src="~/images/slider-1.jpg" alt="">
+        </div>
+        <div class="entry-body">
+            <span class="cat">@post.Author.UserName</span>
+            <h3><a asp-action="Details" asp-controller="Posts" asp-route-id="@post.PostId">@post.Title</a></h3>
+            <p>@(post.Text.Length < 39 ? post.Text : post.Text.Substring(0, 39) + "...")</p>
+            <div class="read-more-date">
+                <a asp-action="Details" asp-controller="Posts" asp-route-id="@post.PostId">Read More..</a>
+                <span class="date">@post.CreatedDateTime.ToShortDateString() at @post.CreatedDateTime.ToShortTimeString()</span>
+
+            </div>
+
+            <br />
+
+            <ul class="tags">
+                @foreach (var tag in post.Tags)
+                {
+                    <li><a href="#!">@tag.Name</a></li>
+                }
+            </ul>
+
+            <br />
+            <ul class="post-footer">
+
+                <li>
+                    <a href="#!" class="likeButton" data-postId="@post.PostId">
+                        <like-icon post-id="@post.PostId"></like-icon>
+                        <span id=@("likesNumber" + post.PostId)>@(post.LikesNumber)</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Posts" asp-action="Details" asp-fragment="comments" asp-route-id="@post.PostId">
+                        <i class="fas fa-comment"></i>
+                        @(post.CommentsNumber)
+                    </a>
+                </li>
+            </ul>
 
         </div>
-        <br />
-        <ul class="post-footer">
-            <li>
-                <a href="#!" class="likeButton" data-postId="@Model.PostId">
-                    <like-icon post-id="@Model.PostId"></like-icon>
-                    <span id=@("likesNumber" + @Model.PostId)>@(Model.Likes?.Count ?? 0)</span>
-                </a>
-            </li>
-            <li>
-                <a asp-controller="Posts" asp-action="Details" asp-fragment="comments" asp-route-id="@Model.PostId">
-                    <i class="fas fa-comment"></i>
-                    @(Model.Comments?.Count ?? 0)
-                </a>
-            </li>
-        </ul>
-
     </div>
-</div>
+}

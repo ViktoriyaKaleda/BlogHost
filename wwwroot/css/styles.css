@@ -6,6 +6,15 @@ ul, li {
     list-style: none;
 }
 
+p {
+    word-wrap: break-word;
+}
+
+textarea {
+    width: 100%;
+    display: block;
+}
+
 a, button {
     display: inline-block;
     text-decoration: none;
@@ -75,3 +84,45 @@ ul.icons > li > a > i{ padding-left: 15px; font-size: 1.1em; opacity: .5; }
 .fa-heart.red {
     color: red;
 }
+
+.src-area {
+    position: relative;
+    height: 40px;
+    width: 30%;
+    float: right;
+    display: inline-block;
+    background: #ffffff;
+}
+
+    .src-area .src-input {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        padding: 0 20px 0 70px;
+        background: transparent;
+        border: 0;
+        outline: 0;
+    }
+
+        .src-area .src-input:focus {
+            box-shadow: 0px 0px 1px #aaa;
+        }
+
+    .src-area .src-btn {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        background: none;
+        border: 0;
+        font-size: 1.2em;
+        outline: 0;
+        margin-left: 20px;
+        opacity: .6;
+        cursor: pointer;
+        z-index: 10;
+    }

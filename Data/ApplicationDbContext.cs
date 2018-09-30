@@ -13,9 +13,11 @@ namespace BlogHosting.Data
 			: base(options)
 		{
 		}
+
 		public DbSet<BlogH.Models.Blog> Blog { get; set; }
 		public DbSet<BlogH.Models.Post> Post { get; set; }
 		public DbSet<BlogH.Models.Like> Like { get; set; }
 		public DbSet<BlogH.Models.Comment> Comment { get; set; }
+		public DbSet<BlogH.Models.Tag> Tag { get; set; }
 	}
 }

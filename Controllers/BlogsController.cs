@@ -9,6 +9,8 @@ using BlogH.Models;
 using BlogHosting.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
+using BlogHosting.Models.PostViewModels;
+using BlogHosting.Models.BlogViewModels;
 
 namespace BlogHosting.Controllers
 {
@@ -47,6 +49,7 @@ namespace BlogHosting.Controllers
 				.Include(m => m.Posts).ThenInclude(m => m.Comments)
 				.Include(m => m.Posts).ThenInclude(m => m.Likes)
 				.Include(m => m.Posts).ThenInclude(m => m.Author)
+				.Include(m => m.Posts).ThenInclude(m => m.Tags)
 				.SingleOrDefaultAsync(m => m.BlogId == id);
 
 			if (blog == null)
@@ -54,11 +57,58 @@ namespace BlogHosting.Controllers
                 return NotFound();
             }
 
-            return View(blog);
+			var blogViewModel = new BlogDetailsViewModel()
+			{
+				Blog = blog,
+				Posts = blog.Posts.Select(m => new PostPreviewViewModel()
+				{
+					PostId = m.PostId,
+					Title = m.Title,
+					Text = m.Text,
+					Author = m.Author,
+					CreatedDateTime = m.CreatedDateTime,
+					UpdatedDateTime = m.UpdatedDateTime,
+					Tags = m.Tags,
+					LikesNumber = _context.Like.Where(like => like.Post == m).Count(),
+					CommentsNumber = _context.Comment.Where(c => c.Post == m).Count()
+				}).ToList()
+			};
+
+            return View(blogViewModel);
         }
 
-        // GET: Blogs/Create
-        public IActionResult Create()
+		[HttpPost("[Controller]/Details/{id}/Search")]
+		public async Task<IActionResult> Search([FromBody] string text)
+		{
+			var posts = await _context.Post
+				.Include(m => m.Tags)
+				.Include(m => m.Author)
+				.OrderByDescending(m => m.CreatedDateTime)
+				.Where(
+					m => m.Title.Contains(text)
+					|| m.Text.Contains(text)
+					|| m.Tags.Select(t => t.Name).Contains(text)
+					|| text == null
+				)
+				.Select(m => new PostPreviewViewModel()
+				{
+					PostId = m.PostId,
+					Title = m.Title,
+					Text = m.Text,
+					Author = m.Author,
+					CreatedDateTime = m.CreatedDateTime,
+					UpdatedDateTime = m.UpdatedDateTime,
+					Tags = m.Tags,
+					LikesNumber = _context.Like.Where(like => like.Post == m).Count(),
+					CommentsNumber = _context.Comment.Where(c => c.Post == m).Count()
+				})
+				.ToListAsync();
+
+			return PartialView("~/Views/Posts/PostPartial.cshtml", posts);
+		}
+
+		// GET: Blogs/Create
+		public IActionResult Create()
         {
             return View();
         }

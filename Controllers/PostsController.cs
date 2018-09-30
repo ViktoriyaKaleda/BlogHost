@@ -50,6 +50,7 @@ namespace BlogHosting.Controllers
 				.Include(m => m.Comments).ThenInclude(m => m.ChildComments).ThenInclude(m => m.Author)
 				.Include(m => m.Author)
 				.Include(m => m.Likes)
+				.Include(m => m.Tags)
 				.SingleOrDefaultAsync(m => m.PostId == id);
 
 			if (post == null)
@@ -153,7 +154,7 @@ namespace BlogHosting.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PostId,Title,Text,CreatedDateTime,UpdatedDateTime")] Post post)
+        public async Task<IActionResult> Create([Bind("PostId,Title,Text")] Post post, string[] tags)
         {
             if (ModelState.IsValid)
             {
@@ -161,12 +162,23 @@ namespace BlogHosting.Controllers
 				post.CreatedDateTime = DateTime.Now;
 				post.UpdatedDateTime = post.CreatedDateTime;
 				post.Blog = await _context.Blog.FirstOrDefaultAsync(b => b.BlogId == (int)TempData["blogId"]);
+				if (tags != null)
+				{
+					List<Tag> postTags = new List<Tag>();
+					foreach (var tag in tags)
+					{
+						Tag postTag = new Tag() { Name = tag };
+						_context.Tag.Add(postTag);
+						postTags.Add(postTag);
+					}
+					post.Tags = postTags;
+				}
 
 				_context.Add(post);
                 await _context.SaveChangesAsync();
 				return RedirectToAction(
 					nameof(Details),
-					nameof(BlogsController),
+					"Blogs",
 					new RouteValueDictionary(new { controller = "Blogs", action = "Details", id = post.Blog.BlogId }
 				));
 			}
