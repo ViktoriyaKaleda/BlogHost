@@ -1,28 +1,63 @@
-﻿@model BlogH.Models.Blog
+﻿@model BlogHosting.Models.BlogViewModels.BlogDetailsViewModel
 @{
     ViewData["Title"] = "Details";
 }
-<h2>
-    @Model.BlogName
-    <a asp-action="Edit" asp-route-id="@Model.BlogId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
-</h2>
+<div>
+    <h2>
+        @Model.Blog.BlogName
+        <a asp-action="Edit" asp-route-id="@Model.Blog.BlogId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
+
+    </h2>
+
+    <div class="src-area">
+        <form>
+            <button class="src-btn" type="submit"><i class="fas fa-search"></i></button>
+            <input id="searchInput" class="src-input" type="text" placeholder="Search for...">
+        </form>
+    </div>
+</div>
+
 <p>
-    <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.BlogId">Create New Post</a>
+    <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.Blog.BlogId">Create New Post</a>
 </p>
+
+
+
 @if (Model.Posts.Count == 0)
 {
     <h3>This blog is empty</h3>
 }
+
 <div class="container">
     <div class="row">
         <div class="col col-xs-12">
-            <div class="blog-grids">
-                @foreach (var post in Model.Posts)
-                {
-                    <partial name="~/Views/Posts/PostPartial.cshtml" model="@post" />
-                    @*@Html.Partial("~/Views/Posts/PostPartial.cshtml", post)*@
-                }
+            <div id="postsContainer" class="blog-grids">
+                <partial name="~/Views/Posts/PostPartial.cshtml" model="@Model.Posts" />
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function Search(inputText) {
+            $.ajax({
+                url: @Model.Blog.BlogId + "/Search",
+                type: 'POST',
+                data: JSON.stringify(inputText),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'html',
+                success: (result) => {
+                    $("#postsContainer").html(result);
+                }
+            })
+        }
+
+        $(document).ready(() => {
+            $("#searchInput").keyup(() => {
+                const t = $('#searchInput').val();
+                Search(t);
+            });
+        });
+    </script>
+}

@@ -44,6 +44,8 @@ namespace BlogHosting
 
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+			services.AddMvcCore().AddJsonFormatters();
+
 			services.AddSignalR();
 		}
 
