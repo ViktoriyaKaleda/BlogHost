@@ -8,6 +8,7 @@
         <div class="col-lg-8">
             <!-- Title -->
             <h1 class="mt-4">@Model.Title.ToUpper()</h1>
+            <a asp-action="Edit" asp-route-id="@Model.PostId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
             <!-- Author -->
             <p class="lead">
                 by @Model.Author.UserName
@@ -65,6 +66,9 @@
                     <partial name="~/Views/Posts/CommentPartial.cshtml" model="@comment" />
                 }
             }
-        </div>       
+        </div>
+        <div class="col-md-4">
+            @await Component.InvokeAsync("MostPopularPosts", new { authorId = Model.Author.Id, postId = Model.PostId })
+        </div>
     </div>
 </div>

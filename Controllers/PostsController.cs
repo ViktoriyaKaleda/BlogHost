@@ -206,7 +206,7 @@ namespace BlogHosting.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PostId,Title,Text,CreatedDateTime,UpdatedDateTime")] Post post)
+        public async Task<IActionResult> Edit(int id, [Bind("PostId,Title,Text")] Post post, string[] tags)
         {
             if (id != post.PostId)
             {
@@ -217,6 +217,15 @@ namespace BlogHosting.Controllers
             {
                 try
                 {
+					List<Tag> postTags = new List<Tag>();
+					foreach (string tagName in tags)
+					{
+						Tag tag = new Tag() { Name = tagName };
+						postTags.Add(tag);
+						_context.Tag.Add(tag);
+					}
+					post.Tags = postTags;
+
                     _context.Update(post);
                     await _context.SaveChangesAsync();
                 }
@@ -231,8 +240,11 @@ namespace BlogHosting.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
-            }
+				return RedirectToAction(
+					nameof(Details),
+					new RouteValueDictionary(new { controller = "Posts", action = "Details", id = post.PostId }
+				));
+			}
             return View(post);
         }
 

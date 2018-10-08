@@ -1,0 +1,27 @@
+﻿<div class="card my-4">
+    <h3>Other most popular posts by @ViewBag.Author</h3>
+    <ul class="list-group">
+        @foreach (var post in ViewBag.Posts)
+        {
+
+            <li class="list-group-item">
+                <a asp-action="Details" asp-route-id="@post.PostId">@post.Title</a>
+                <ul class="post-footer">
+                    <li>
+                        <a href="#!" class="likeButton" data-postId="@post.PostId">
+                            <like-icon post-id="@post.PostId"></like-icon>
+                            <span id=@("likesNumber" + post.PostId)>@(post.Likes?.Count ?? 0)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Posts" asp-action="Details" asp-fragment="comments" asp-route-id="@post.PostId">
+                            <i class="fas fa-comment"></i>
+                            @(post.Comments?.Count ?? 0)
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+        }
+    </ul>
+</div>
