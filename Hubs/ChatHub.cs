@@ -1,5 +1,6 @@
 ﻿using BlogH.Models;
 using BlogHosting.Data;
+using BlogHosting.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +14,9 @@ namespace SignalRChat.Hubs
 	public class ChatHub : Hub
 	{
 		private readonly ApplicationDbContext _context;
-		private readonly UserManager<IdentityUser> _userManager;
+		private readonly UserManager<ApplicationUser> _userManager;
 
-		public ChatHub(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+		public ChatHub(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
 		{
 			_context = context;
 			_userManager = userManager;
@@ -26,6 +27,7 @@ namespace SignalRChat.Hubs
 			int id = Int32.Parse(postId);
 
 			var owner = await _userManager.GetUserAsync(Context.GetHttpContext().User);
+
 			var post = await _context.Post.SingleOrDefaultAsync(m => m.PostId == id);
 
 			Like like = await _context.Like.SingleOrDefaultAsync(m => m.Post == post && m.Owner == owner);

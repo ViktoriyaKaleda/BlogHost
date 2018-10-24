@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using BlogH.Models;
 using BlogHosting.Data;
+using BlogHosting.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -25,9 +26,9 @@ namespace BlogHosting.TagHelpers
 
 		private readonly ApplicationDbContext _context;
 
-		private readonly UserManager<IdentityUser> _userManager;
+		private readonly UserManager<ApplicationUser> _userManager;
 
-		public LikeIconTagHelper (ApplicationDbContext context,	UserManager<IdentityUser> userManager)
+		public LikeIconTagHelper (ApplicationDbContext context,	UserManager<ApplicationUser> userManager)
 		{
 			_context = context;
 			_userManager = userManager;

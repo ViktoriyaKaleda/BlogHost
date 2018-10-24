@@ -8,7 +8,10 @@
         <div class="col-lg-8">
             <!-- Title -->
             <h1 class="mt-4">@Model.Title.ToUpper()</h1>
-            <a asp-action="Edit" asp-route-id="@Model.PostId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
+            @if ((await AuthorizationService.AuthorizeAsync(User, Model, "OwnerPolicy")).Succeeded)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.PostId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
+            }
             <!-- Author -->
             <p class="lead">
                 by @Model.Author.UserName

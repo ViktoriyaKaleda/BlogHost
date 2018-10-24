@@ -4,14 +4,16 @@ using BlogHosting.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlogHosting.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181008175712_ExtendUserClass")]
+    partial class ExtendUserClass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -190,9 +192,6 @@ namespace BlogHosting.Data.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired();
-
                     b.Property<string>("Email")
                         .HasMaxLength(256);
 
@@ -232,8 +231,6 @@ namespace BlogHosting.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -306,31 +303,16 @@ namespace BlogHosting.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("BlogHosting.Models.ApplicationUser", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<string>("AvatarPath");
-
-                    b.Property<string>("FirstName");
-
-                    b.Property<string>("LastName");
-
-                    b.ToTable("ApplicationUser");
-
-                    b.HasDiscriminator().HasValue("ApplicationUser");
-                });
-
             modelBuilder.Entity("BlogH.Models.Blog", b =>
                 {
-                    b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
                 });
 
             modelBuilder.Entity("BlogH.Models.Comment", b =>
                 {
-                    b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
 
@@ -345,7 +327,7 @@ namespace BlogHosting.Data.Migrations
 
             modelBuilder.Entity("BlogH.Models.Like", b =>
                 {
-                    b.HasOne("BlogHosting.Models.ApplicationUser", "Owner")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId");
 
@@ -356,7 +338,7 @@ namespace BlogHosting.Data.Migrations
 
             modelBuilder.Entity("BlogH.Models.Post", b =>
                 {
-                    b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
 

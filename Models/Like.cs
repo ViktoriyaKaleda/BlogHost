@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BlogHosting.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlogH.Models
 {
@@ -8,6 +9,6 @@ namespace BlogH.Models
 
 		public Post Post { get; set; }
 
-		public IdentityUser Owner { get; set; }
+		public ApplicationUser Owner { get; set; }
 	}
 }

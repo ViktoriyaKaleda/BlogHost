@@ -4,9 +4,10 @@
     ViewData["Title"] = "Edit";
 }
 
-<h2>Edit</h2>
-
-<h4>Blog</h4>
+<h2>Edit Blog</h2>
+<p>
+    <a asp-action="Delete" asp-route-id="@Model.BlogId">Delete this Blog</a>
+</p>
 <hr />
 <div class="row">
     <div class="col-md-4">

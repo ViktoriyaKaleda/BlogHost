@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BlogHosting.Models;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +11,7 @@ namespace BlogH.Models
 
 		public Blog Blog { get; set; }
 
-		public IdentityUser Author { get; set; }
+		public ApplicationUser Author { get; set; }
 
 		public string Title { get; set; }
 

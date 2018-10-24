@@ -4,14 +4,16 @@ using BlogHosting.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlogHosting.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181009103506_ExtendUserModel2")]
+    partial class ExtendUserModel2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -323,14 +325,14 @@ namespace BlogHosting.Data.Migrations
 
             modelBuilder.Entity("BlogH.Models.Blog", b =>
                 {
-                    b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
                 });
 
             modelBuilder.Entity("BlogH.Models.Comment", b =>
                 {
-                    b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
 
@@ -345,7 +347,7 @@ namespace BlogHosting.Data.Migrations
 
             modelBuilder.Entity("BlogH.Models.Like", b =>
                 {
-                    b.HasOne("BlogHosting.Models.ApplicationUser", "Owner")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId");
 
@@ -356,7 +358,7 @@ namespace BlogHosting.Data.Migrations
 
             modelBuilder.Entity("BlogH.Models.Post", b =>
                 {
-                    b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
 

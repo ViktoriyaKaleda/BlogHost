@@ -1,4 +1,5 @@
 ﻿using BlogHosting.Data;
+using BlogHosting.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +13,9 @@ namespace BlogHosting.Components
 	public class MostPopularPosts : ViewComponent
 	{
 		private readonly ApplicationDbContext _context;
-		private readonly UserManager<IdentityUser> _userManager;
+		private readonly UserManager<ApplicationUser> _userManager;
 
-		public MostPopularPosts(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+		public MostPopularPosts(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
 		{
 			_context = context;
 			_userManager = userManager;

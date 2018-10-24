@@ -11,18 +11,19 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Authorization;
+using BlogHosting.Models;
 
 namespace BlogHosting.Controllers
 {
     public class PostsController : Controller
     {
 		private readonly ApplicationDbContext _context;
-		private readonly UserManager<IdentityUser> _userManager;
+		private readonly UserManager<ApplicationUser> _userManager;
 		private IHostingEnvironment _appEnvironment;
 
 		public PostsController(
 				ApplicationDbContext context,
-				UserManager<IdentityUser> userManager,
+				UserManager<ApplicationUser> userManager,
 				IHostingEnvironment appEnvironment
 			)
 		{

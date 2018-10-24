@@ -14,6 +14,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SignalRChat.Hubs;
 using BlogHosting.Hubs;
+using BlogHosting.Models;
+using Microsoft.AspNetCore.Authorization;
+using BlogHosting.Requirements;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace BlogHosting
 {
@@ -39,7 +43,7 @@ namespace BlogHosting
 			services.AddDbContext<ApplicationDbContext>(options =>
 				options.UseSqlServer(
 					Configuration.GetConnectionString("DefaultConnection")));
-			services.AddDefaultIdentity<IdentityUser>()
+			services.AddDefaultIdentity<ApplicationUser>()
 				.AddEntityFrameworkStores<ApplicationDbContext>();
 
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -47,6 +51,18 @@ namespace BlogHosting
 			services.AddMvcCore().AddJsonFormatters();
 
 			services.AddSignalR();
+
+			services.AddAuthorization(options =>
+			{
+				options.AddPolicy("OwnerPolicy", policy =>
+					policy.Requirements.Add(new OwnerRequirement()));
+			});
+
+			services.AddScoped<IAuthorizationHandler,
+						  BlogOwnerAuthorizationHandler>();
+
+			services.AddScoped<IAuthorizationHandler,
+						  PostOwnerAuthorizationHandler>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

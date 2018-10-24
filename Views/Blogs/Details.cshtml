@@ -3,29 +3,38 @@
     ViewData["Title"] = "Details";
 }
 <div>
-    <h2>
-        @Model.Blog.BlogName
-        <a asp-action="Edit" asp-route-id="@Model.Blog.BlogId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
+    @if ((await AuthorizationService.AuthorizeAsync(User, Model.Blog, "OwnerPolicy")).Succeeded)
+    {
+        <h2>
+            @Model.Blog.BlogName
+            <a asp-action="Edit" asp-route-id="@Model.Blog.BlogId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
+        </h2>
+        <p>
+            <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.Blog.BlogId">Create New Post</a>
+        </p>
+    }
+    else
+    {
+        <h2>
+            @Model.Blog.BlogName
+        </h2>
+    }
 
-    </h2>
+</div>
 
+
+@if (Model.Posts.Count == 0)
+{
+    <h3>This blog is empty</h3>
+}
+else
+{
     <div class="src-area">
         <form>
             <button class="src-btn" type="submit"><i class="fas fa-search"></i></button>
             <input id="searchInput" class="src-input" type="text" placeholder="Search for...">
         </form>
     </div>
-</div>
-
-<p>
-    <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.Blog.BlogId">Create New Post</a>
-</p>
-
-
-
-@if (Model.Posts.Count == 0)
-{
-    <h3>This blog is empty</h3>
 }
 
 <div class="container">

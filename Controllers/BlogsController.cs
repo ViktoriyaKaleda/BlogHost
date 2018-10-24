@@ -11,30 +11,38 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using BlogHosting.Models.PostViewModels;
 using BlogHosting.Models.BlogViewModels;
+using BlogHosting.Models;
+using Microsoft.AspNetCore.Authorization;
+using BlogHosting.Requirements;
 
 namespace BlogHosting.Controllers
 {
     public class BlogsController : Controller
     {
 		private readonly ApplicationDbContext _context;
-		private readonly UserManager<IdentityUser> _userManager;
-		private IHostingEnvironment _appEnvironment;
+		private readonly UserManager<ApplicationUser> _userManager;
+		private readonly IHostingEnvironment _appEnvironment;
+		private readonly IAuthorizationService _authorizationService;
 
 		public BlogsController(
 				ApplicationDbContext context,
-				UserManager<IdentityUser> userManager,
-				IHostingEnvironment appEnvironment
+				UserManager<ApplicationUser> userManager,
+				IHostingEnvironment appEnvironment,
+				IAuthorizationService authorizationService
 			)
 		{
 			_context = context;
 			_userManager = userManager;
 			_appEnvironment = appEnvironment;
+			_authorizationService = authorizationService;
 		}
 
 		// GET: Blogs
 		public async Task<IActionResult> Index()
         {
-            return View(await _context.Blog.Include(m => m.Author).OrderByDescending(m => m.CreatedDateTime).ToListAsync());
+			var blog = await _context.Blog.Include(m => m.Author).OrderByDescending(m => m.CreatedDateTime).ToListAsync();
+
+			return View(blog);
         }
 
         // GET: Blogs/Details/5
@@ -46,6 +54,7 @@ namespace BlogHosting.Controllers
             }
 
 			var blog = await _context.Blog
+				.Include(m => m.Author)
 				.Include(m => m.Posts).ThenInclude(m => m.Comments)
 				.Include(m => m.Posts).ThenInclude(m => m.Likes)
 				.Include(m => m.Posts).ThenInclude(m => m.Author)
@@ -108,6 +117,7 @@ namespace BlogHosting.Controllers
 		}
 
 		// GET: Blogs/Create
+		[Authorize]
 		public IActionResult Create()
         {
             return View();
@@ -118,7 +128,8 @@ namespace BlogHosting.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BlogId,BlogName,Description,CreatedDateTime,UpdatedDateTime")] Blog blog)
+		[Authorize]
+		public async Task<IActionResult> Create([Bind("BlogId,BlogName,Description,CreatedDateTime,UpdatedDateTime")] Blog blog)
         {
             if (ModelState.IsValid)
             {
@@ -133,20 +144,32 @@ namespace BlogHosting.Controllers
             return View(blog);
         }
 
-        // GET: Blogs/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+		// GET: Blogs/Edit/5
+		[Authorize]
+		public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var blog = await _context.Blog.FindAsync(id);
+            var blog = await _context.Blog.Include(m => m.Author).FirstOrDefaultAsync(m => m.BlogId == id);
             if (blog == null)
             {
                 return NotFound();
             }
-            return View(blog);
+
+			var isOwner = await _authorizationService.AuthorizeAsync(User, blog, "OwnerPolicy");
+			if (isOwner.Succeeded)
+			{
+				return View(blog);
+			}
+
+			else
+			{
+				return Forbid();
+			}
+			
         }
 
         // POST: Blogs/Edit/5
@@ -154,7 +177,8 @@ namespace BlogHosting.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BlogId,BlogName,Description,CreatedDateTime,UpdatedDateTime")] Blog blog)
+		[Authorize]
+		public async Task<IActionResult> Edit(int id, [Bind("BlogId,BlogName,Description,CreatedDateTime,UpdatedDateTime")] Blog blog)
         {
             if (id != blog.BlogId)
             {
@@ -184,28 +208,38 @@ namespace BlogHosting.Controllers
             return View(blog);
         }
 
-        // GET: Blogs/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+		// GET: Blogs/Delete/5
+		[Authorize]
+		public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var blog = await _context.Blog
-                .FirstOrDefaultAsync(m => m.BlogId == id);
-            if (blog == null)
-            {
-                return NotFound();
-            }
+			var blog = await _context.Blog.Include(m => m.Author).FirstOrDefaultAsync(m => m.BlogId == id);
+			if (blog == null)
+			{
+				return NotFound();
+			}
 
-            return View(blog);
+			var isOwner = await _authorizationService.AuthorizeAsync(User, blog, "OwnerPolicy");
+			if (isOwner.Succeeded)
+			{
+				return View(blog);
+			}
+
+			else
+			{
+				return Forbid();
+			}
         }
 
         // POST: Blogs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+		[Authorize]
+		public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var blog = await _context.Blog.FindAsync(id);
             _context.Blog.Remove(blog);

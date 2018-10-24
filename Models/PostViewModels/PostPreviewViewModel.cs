@@ -13,7 +13,7 @@ namespace BlogHosting.Models.PostViewModels
 
 		public string Text { get; set; }
 
-		public IdentityUser Author { get; set; }
+		public ApplicationUser Author { get; set; }
 
 		public DateTime CreatedDateTime { get; set; }
 
