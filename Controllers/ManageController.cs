@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -9,10 +9,11 @@ using BlogHosting.Models.ManageViewModels;
 using BlogHosting.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace BlogHosting.Controllers
 {
@@ -25,6 +26,7 @@ namespace BlogHosting.Controllers
 		private readonly IEmailSender _emailSender;
 		private readonly ILogger _logger;
 		private readonly UrlEncoder _urlEncoder;
+		private readonly IHostingEnvironment _appEnvironment;
 
 		private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 		private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -34,13 +36,15 @@ namespace BlogHosting.Controllers
 		  SignInManager<ApplicationUser> signInManager,
 		  IEmailSender emailSender,
 		  ILogger<ManageController> logger,
-		  UrlEncoder urlEncoder)
+		  UrlEncoder urlEncoder,
+		  IHostingEnvironment appEnvironment)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_emailSender = emailSender;
 			_logger = logger;
 			_urlEncoder = urlEncoder;
+			_appEnvironment = appEnvironment;
 		}
 
 		[TempData]
@@ -58,6 +62,9 @@ namespace BlogHosting.Controllers
 			var model = new IndexViewModel
 			{
 				Username = user.UserName,
+				FirstName = user.FirstName,
+				LastName = user.LastName,
+				AvatarPath =  user.AvatarPath,
 				Email = user.Email,
 				PhoneNumber = user.PhoneNumber,
 				IsEmailConfirmed = user.EmailConfirmed,
@@ -100,6 +107,44 @@ namespace BlogHosting.Controllers
 				{
 					throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
 				}
+			}
+
+			if (model.AvatarFile?.FileName != null)
+			{
+				if (user.AvatarPath != null)
+				{
+					try
+					{
+						System.IO.File.Delete(_appEnvironment.WebRootPath + "/Avatars/" + Path.GetFileName(user.AvatarPath));
+					}
+					catch (System.IO.IOException e)
+					{
+						_logger.LogWarning("Failed to delete user avatar file. File path: {}", user.AvatarPath);
+					}
+				}
+
+				string path = GetAvatarPath(model.AvatarFile);
+
+				user.AvatarPath = "~/" + path;
+
+				using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
+				{
+					await model.AvatarFile.CopyToAsync(fileStream);
+				}
+
+				await _userManager.UpdateAsync(user);
+			}
+
+			if (model.FirstName != user.FirstName)
+			{
+				user.FirstName = model.FirstName;
+				await _userManager.UpdateAsync(user);
+			}
+
+			if (model.LastName != user.LastName)
+			{
+				user.LastName = model.LastName;
+				await _userManager.UpdateAsync(user);
 			}
 
 			StatusMessage = "Your profile has been updated";
@@ -538,6 +583,15 @@ namespace BlogHosting.Controllers
 
 			model.SharedKey = FormatKey(unformattedKey);
 			model.AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
+		}
+
+		private string GetAvatarPath(IFormFile avatar)
+		{
+			string fileName = Path.GetFileNameWithoutExtension(avatar.FileName);
+			string extension = Path.GetExtension(avatar.FileName);
+			fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
+
+			return "Avatars/" + fileName;
 		}
 
 		#endregion
