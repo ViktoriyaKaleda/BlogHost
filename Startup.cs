@@ -18,6 +18,7 @@ using BlogHosting.Models;
 using Microsoft.AspNetCore.Authorization;
 using BlogHosting.Requirements;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using BlogHosting.Services;
 
 namespace BlogHosting
 {
@@ -29,8 +30,7 @@ namespace BlogHosting
 		}
 
 		public IConfiguration Configuration { get; }
-
-		// This method gets called by the runtime. Use this method to add services to the container.
+		
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.Configure<CookiePolicyOptions>(options =>
@@ -43,12 +43,28 @@ namespace BlogHosting
 			services.AddDbContext<ApplicationDbContext>(options =>
 				options.UseSqlServer(
 					Configuration.GetConnectionString("DefaultConnection")));
-			services.AddDefaultIdentity<ApplicationUser>()
-				.AddEntityFrameworkStores<ApplicationDbContext>();
+
+			services.AddIdentity<ApplicationUser, IdentityRole>()
+				.AddEntityFrameworkStores<ApplicationDbContext>()
+				.AddDefaultTokenProviders();
+
+			services.Configure<IdentityOptions>(options =>
+			{
+				// Set your identity Settings here (password length, etc.)
+			});
+
+			services.AddTransient<IEmailSender, EmailSender>();
 
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
 			services.AddMvcCore().AddJsonFormatters();
+
+			services.ConfigureApplicationCookie(options =>
+			{
+				options.LoginPath = $"/account/login";
+				options.LogoutPath = $"/account/logout";
+				options.AccessDeniedPath = $"/account/access-denied";
+			});
 
 			services.AddSignalR();
 
