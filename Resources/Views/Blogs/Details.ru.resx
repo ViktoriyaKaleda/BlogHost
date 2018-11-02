@@ -120,10 +120,16 @@
   <data name="Create New Post" xml:space="preserve">
     <value>Создать новый пост</value>
   </data>
+  <data name="Next" xml:space="preserve">
+    <value>Далее</value>
+  </data>
   <data name="Search for..." xml:space="preserve">
     <value>Искать...</value>
   </data>
   <data name="This blog is empty." xml:space="preserve">
     <value>Этот блог пустой.</value>
+  </data>
+  <data name="To start" xml:space="preserve">
+    <value>В начало</value>
   </data>
 </root>

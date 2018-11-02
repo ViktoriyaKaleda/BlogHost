@@ -1,20 +1,18 @@
-﻿@model IEnumerable<BlogH.Models.Blog>
+﻿@model BlogHosting.Models.PageNavigationViewModels.BlogsPageViewModel
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
-
 <h2>@Localizer["Users Blogs"]</h2>
-
 <p>
     <a asp-action="Create">@Localizer["Create new"]</a>
 </p>
-
 <div class="row">
     <div class="col col-xs-12">
         <div class="blog-grids">
-            @foreach (var blog in Model)
+            @foreach (var blog in Model.Blogs)
             {
                 <partial name="~/Views/Blogs/BlogPartial.cshtml" model="@blog" />
             }
         </div>
     </div>
 </div>
+<partial name="~/Views/Shared/_PageNavigationPartial.cshtml" model="@Model.PageViewModel" />

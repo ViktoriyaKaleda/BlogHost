@@ -120,10 +120,16 @@
   <data name="Create New Post" xml:space="preserve">
     <value>Create New Post</value>
   </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
   <data name="Search for..." xml:space="preserve">
     <value>Search for...</value>
   </data>
   <data name="This blog is empty." xml:space="preserve">
     <value>This blog is empty.</value>
+  </data>
+  <data name="To start" xml:space="preserve">
+    <value>To start</value>
   </data>
 </root>
