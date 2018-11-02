@@ -9,7 +9,8 @@ namespace BlogHosting.Models.AccountViewModels
 		[Display(Name = "Username")]
 		public string Username { get; set; }
 
-		[Required]
+		[Display(Name = "Password")]
+		[Required(ErrorMessage = "Password field is required.")]
 		[DataType(DataType.Password)]
 		public string Password { get; set; }
 

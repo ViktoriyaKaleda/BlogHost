@@ -1,7 +1,6 @@
 ﻿@model BlogH.Models.Post
-@{
-    ViewData["Title"] = "Details";
-}
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 <div class="container">
     <div class="row">
         <!-- Post Content Column -->
@@ -14,10 +13,10 @@
             }
             <!-- Author -->
             <p class="lead">
-                by @Model.Author.UserName
+                @Localizer["by"] @Model.Author.UserName
             </p>
             <!-- Date/Time -->
-            <p>Posted on @Model.CreatedDateTime.ToShortDateString() at @Model.CreatedDateTime.ToShortTimeString()</p>
+            <p>@Localizer["Posted on"] @Model.CreatedDateTime.ToShortDateString() @Localizer["at"] @Model.CreatedDateTime.ToShortTimeString()</p>
             <hr>
             <!-- Image -->
             <img class="rounded img-responsive" src="~/images/slider-1.jpg" alt="">
@@ -46,7 +45,7 @@
             <hr>
             <!-- Comments Form -->
             <div class="card my-4">
-                <h4 class="card-header">Leave a Comment:</h4>
+                <h4 class="card-header">@Localizer["Leave a Comment:"]</h4>
                 <div class="card-body">
                     <form asp-action="PostComment">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -55,11 +54,11 @@
                             <span asp-validation-for="Text" class="text-danger"></span>
                             <input id="parentCommentId" name="parentCommentId" type="hidden" data-parentId="null" />
                         </div>
-                        <button type="submit" class="btn btn-primary">Post comment</button>
+                        <button type="submit" class="btn btn-primary">@Localizer["Post comment"]</button>
                     </form>
                 </div>
             </div>
-            <h3 id="comments">Comments(@($"{Model.Comments?.Count ?? 0}"))</h3>
+            <h3 id="comments">@Localizer["Comments"] (@($"{Model.Comments?.Count ?? 0}"))</h3>
 
             @if (Model.Comments?.Count > 0)
             {
