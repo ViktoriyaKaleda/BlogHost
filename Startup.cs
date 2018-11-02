@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BlogHosting.Data;
@@ -17,8 +12,10 @@ using BlogHosting.Hubs;
 using BlogHosting.Models;
 using Microsoft.AspNetCore.Authorization;
 using BlogHosting.Requirements;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using BlogHosting.Services;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
 
 namespace BlogHosting
 {
@@ -55,7 +52,26 @@ namespace BlogHosting
 
 			services.AddTransient<IEmailSender, EmailSender>();
 
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+			services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+			services.AddMvc()
+				.SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+				.AddDataAnnotationsLocalization()
+				.AddViewLocalization();
+
+			services.Configure<RequestLocalizationOptions>(options =>
+			{
+				var supportedCultures = new[]
+				{
+					new CultureInfo("en"),
+					new CultureInfo("de"),
+					new CultureInfo("ru")
+				};
+
+				options.DefaultRequestCulture = new RequestCulture("ru");
+				options.SupportedCultures = supportedCultures;
+				options.SupportedUICultures = supportedCultures;
+			});
 
 			services.AddMvcCore().AddJsonFormatters();
 
@@ -96,6 +112,10 @@ namespace BlogHosting
 			}
 
 			app.UseHttpsRedirection();
+
+			var locOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();
+			app.UseRequestLocalization(locOptions.Value);
+
 			app.UseStaticFiles();
 			app.UseCookiePolicy();
 

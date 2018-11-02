@@ -1,9 +1,11 @@
 ﻿@model IEnumerable<BlogH.Models.Blog>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
-<h2>Users blogs</h2>
+<h2>@Localizer["Users Blogs"]</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">@Localizer["Create new"]</a>
 </p>
 
 <div class="row">
@@ -12,7 +14,6 @@
             @foreach (var blog in Model)
             {
                 <partial name="~/Views/Blogs/BlogPartial.cshtml" model="@blog" />
-                @*@Html.Partial("~/Views/Posts/PostPartial.cshtml", post)*@
             }
         </div>
     </div>

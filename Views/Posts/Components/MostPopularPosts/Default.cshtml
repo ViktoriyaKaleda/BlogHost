@@ -1,9 +1,10 @@
-﻿<div class="card my-4">
-    <h3>Other most popular posts by @ViewBag.Author</h3>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+<div class="card my-4">
+    <h3>@Localizer["Other most popular posts by"] @ViewBag.Author</h3>
     <ul class="list-group">
         @foreach (var post in ViewBag.Posts)
         {
-
             <li class="list-group-item">
                 <a asp-action="Details" asp-route-id="@post.PostId">@post.Title</a>
                 <ul class="post-footer">
