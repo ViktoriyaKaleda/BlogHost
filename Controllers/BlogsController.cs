@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BlogH.Models;
 using BlogHosting.Data;
@@ -13,11 +11,11 @@ using BlogHosting.Models.PostViewModels;
 using BlogHosting.Models.BlogViewModels;
 using BlogHosting.Models;
 using Microsoft.AspNetCore.Authorization;
-using BlogHosting.Requirements;
+using BlogHosting.Models.PageNavigationViewModels;
 
 namespace BlogHosting.Controllers
 {
-    public class BlogsController : Controller
+	public class BlogsController : Controller
     {
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<ApplicationUser> _userManager;
@@ -38,15 +36,26 @@ namespace BlogHosting.Controllers
 		}
 
 		// GET: Blogs
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(int page = 1)
         {
-			var blog = await _context.Blog.Include(m => m.Author).OrderByDescending(m => m.CreatedDateTime).ToListAsync();
+			int pageSize = 3;   // number of blogs on page
 
-			return View(blog);
+			IQueryable<Blog> source = _context.Blog.Include(m => m.Author).OrderByDescending(m => m.CreatedDateTime);
+			var count = await source.CountAsync();
+			var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+			PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
+			BlogsPageViewModel viewModel = new BlogsPageViewModel
+			{
+				PageViewModel = pageViewModel,
+				Blogs = items
+			};
+
+			return View(viewModel);
         }
 
         // GET: Blogs/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, int page = 1)
         {
             if (id == null)
             {
@@ -65,25 +74,36 @@ namespace BlogHosting.Controllers
             {
                 return NotFound();
             }
-
-			var blogViewModel = new BlogDetailsViewModel()
+			
+			var posts = blog.Posts.Select(m => new PostPreviewViewModel()
 			{
+				PostId = m.PostId,
+				Title = m.Title,
+				Text = m.Text,
+				Author = m.Author,
+				CreatedDateTime = m.CreatedDateTime,
+				UpdatedDateTime = m.UpdatedDateTime,
+				Tags = m.Tags,
+				LikesNumber = _context.Like.Where(like => like.Post == m).Count(),
+				CommentsNumber = _context.Comment.Where(c => c.Post == m).Count()
+			}).ToList();
+
+			int pageSize = 3;
+
+			var count = posts.Count();
+
+			var items = posts.Skip((page - 1) * pageSize).Take(pageSize);
+
+			PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
+
+			BlogsDetailsPageViewModel viewModel = new BlogsDetailsPageViewModel
+			{
+				PageViewModel = pageViewModel,
 				Blog = blog,
-				Posts = blog.Posts.Select(m => new PostPreviewViewModel()
-				{
-					PostId = m.PostId,
-					Title = m.Title,
-					Text = m.Text,
-					Author = m.Author,
-					CreatedDateTime = m.CreatedDateTime,
-					UpdatedDateTime = m.UpdatedDateTime,
-					Tags = m.Tags,
-					LikesNumber = _context.Like.Where(like => like.Post == m).Count(),
-					CommentsNumber = _context.Comment.Where(c => c.Post == m).Count()
-				}).ToList()
+				Posts = items
 			};
 
-            return View(blogViewModel);
+			return View(viewModel);
         }
 
 		[HttpPost("[Controller]/Details/{id}/Search")]
