@@ -168,7 +168,7 @@ namespace BlogHosting.Controllers
 					List<Tag> postTags = new List<Tag>();
 					foreach (var tag in tags)
 					{
-						Tag postTag = new Tag() { Name = tag };
+						Tag postTag = new Tag() { Name = tag, PostId = post.PostId };
 						_context.Tag.Add(postTag);
 						postTags.Add(postTag);
 					}

@@ -206,7 +206,7 @@ namespace BlogHosting.Migrations
                         column: x => x.BlogId,
                         principalTable: "Blog",
                         principalColumn: "BlogId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -243,7 +243,7 @@ namespace BlogHosting.Migrations
                         column: x => x.PostId,
                         principalTable: "Post",
                         principalColumn: "PostId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -269,7 +269,7 @@ namespace BlogHosting.Migrations
                         column: x => x.PostId,
                         principalTable: "Post",
                         principalColumn: "PostId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -279,14 +279,15 @@ namespace BlogHosting.Migrations
                     TagId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
-                    PostId = table.Column<int>(nullable: true)
+                    PostId = table.Column<string>(nullable: false),
+                    PostId1 = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tag", x => x.TagId);
                     table.ForeignKey(
-                        name: "FK_Tag_Post_PostId",
-                        column: x => x.PostId,
+                        name: "FK_Tag_Post_PostId1",
+                        column: x => x.PostId1,
                         principalTable: "Post",
                         principalColumn: "PostId",
                         onDelete: ReferentialAction.Restrict);
@@ -372,9 +373,9 @@ namespace BlogHosting.Migrations
                 column: "BlogId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tag_PostId",
+                name: "IX_Tag_PostId1",
                 table: "Tag",
-                column: "PostId");
+                column: "PostId1");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

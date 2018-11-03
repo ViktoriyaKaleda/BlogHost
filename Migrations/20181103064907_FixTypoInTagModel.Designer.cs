@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogHosting.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20181101092624_Initial")]
-    partial class Initial
+    [Migration("20181103064907_FixTypoInTagModel")]
+    partial class FixTypoInTagModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -129,7 +129,7 @@ namespace BlogHosting.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<int?>("PostId");
+                    b.Property<int>("PostId");
 
                     b.HasKey("TagId");
 
@@ -324,7 +324,8 @@ namespace BlogHosting.Migrations
 
                     b.HasOne("BlogH.Models.Post", "Post")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("BlogH.Models.Like", b =>
@@ -335,7 +336,8 @@ namespace BlogHosting.Migrations
 
                     b.HasOne("BlogH.Models.Post", "Post")
                         .WithMany("Likes")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("BlogH.Models.Post", b =>
@@ -346,14 +348,16 @@ namespace BlogHosting.Migrations
 
                     b.HasOne("BlogH.Models.Blog", "Blog")
                         .WithMany("Posts")
-                        .HasForeignKey("BlogId");
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("BlogH.Models.Tag", b =>
                 {
                     b.HasOne("BlogH.Models.Post")
                         .WithMany("Tags")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
