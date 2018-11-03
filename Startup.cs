@@ -16,6 +16,7 @@ using BlogHosting.Services;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
+using BlogHosting.Configurations;
 
 namespace BlogHosting
 {
@@ -98,7 +99,7 @@ namespace BlogHosting
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env, UserManager<ApplicationUser> userManager)
 		{
 			if (env.IsDevelopment())
 			{
@@ -120,6 +121,8 @@ namespace BlogHosting
 			app.UseCookiePolicy();
 
 			app.UseAuthentication();
+
+			ApplicationDbInitializer.SeedUsers(userManager);
 
 			app.UseMvc(routes =>
 			{

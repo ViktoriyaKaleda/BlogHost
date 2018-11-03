@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using BlogH.Models;
 using BlogHosting.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlogHosting.Data
 {
@@ -41,6 +42,8 @@ namespace BlogHosting.Data
 				.OnDelete(DeleteBehavior.Cascade);
 
 			builder.Entity<Tag>().Property(m => m.PostId).IsRequired();
+
+			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "Admin".ToUpper() });
 		}
 	}
 }
