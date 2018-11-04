@@ -33,19 +33,19 @@
                     <partial name="~/Views/Blogs/ModeratorsPartial.cshtml" model="@Model.Moderators" />
                 </div>
                 <dl id="addBtnContainer" class="dl-horizontal">
-                    <content>
-                        <div id="errorBox" style="display: none;">
-                            <p><span id="errorMessage" name="errorMessage" class="text-danger" /></p>
-                        </div>
-                        <div id="messageBox" style="display: none;">
-                            <p><span id="message" name="message" class="text-info" /></p>
-                        </div>
-                        <div id="successBox" style="display: none;">
-                            <p><span id="successMessage" name="successMessage" class="text-success" /></p>
-                        </div>
-                    </content>
                     <dt><input id="newModerator" class="form-control" /></dt>
                     <dd><a id="addNewModerator" class="btn btn-primary">Add new</a></dd>
+                    <content>
+                        <div id="errorBox">
+                            <span style="display: none;" id="errorMessage" name="errorMessage" class="text-danger" />
+                        </div>
+                        <div id="messageBox">
+                            <span style="display: none;" id="infoMessage" name="message" class="text-info" />
+                        </div>
+                        <div id="successBox">
+                            <span style="display: none;" id="successMessage" name="successMessage" class="text-success" />
+                        </div>
+                    </content>
                 </dl>
             </div>
             <div class="form-group">
@@ -70,17 +70,23 @@
                 dataType: 'html',
                 success: (result) => {
                     $('#postsContainer').html(result);
-                    $('#successBox').show();
-                    $('#successMessage').text("Moderator was added.");
-                    $('#successMessage').delay(3000).hide(1);
+                    ShowMessage("Moderator was added.", $('#successMessage'));
                     addDeleteListener();
                 },
                 error: function (jxqr, error, status) {
-                    $('#errorBox').show();
-                    $('#errorMessage').text(jxqr.responseText);
-                    $('#errorMessage').delay(3000).hide(1);
+                    ShowMessage(jxqr.responseText, $('#errorMessage'));
                 },
             })
+        }
+
+        function ShowMessage(msg, element) {
+            element.text(msg);
+            if (element.is(":hidden")) {
+                element.toggle();
+                setTimeout(function () {
+                    element.fadeOut('fast');
+                }, 3000);
+            }
         }
 
         function DeleteModerator(inputText) {
@@ -92,13 +98,10 @@
                 dataType: 'html',
                 success: (result) => {
                     $('#postsContainer').html(result);
-                    $('#messageBox').show();
-                    $('#message').text("Moderator was deleted.");
-                    $('#message').delay(3000).hide(1);
+                    ShowMessage("Moderator was deleted.", $('#infoMessage'));
                 },
             })
         }
-
 
         function addDeleteListener() {
             var deleteButtons = document.getElementsByClassName("deleteModerator");

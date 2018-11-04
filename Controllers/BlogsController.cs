@@ -142,53 +142,42 @@ namespace BlogHosting.Controllers
 		public async Task<IActionResult> AddModerator(int id, [FromBody] string text)
 		{
 			if (String.IsNullOrEmpty(text))
-			{
 				return BadRequest("Field can not be empty.");
-			}				
 
 			var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == text);
 
 			if (user == null)
-			{
 				return NotFound("User is not found.");
-			}
 
-			else
-			{
-				var blog = await _context.Blog.Include(m => m.BlogModerators).FirstOrDefaultAsync(m => m.BlogId == id);
-				if (blog == null)
-					return NotFound();
+			if (user == await _userManager.GetUserAsync(HttpContext.User))
+				return BadRequest("You already have absolute rights for this blog.");
 
-				if (blog.BlogModerators.FirstOrDefault(m => m.ModeratorId == user.Id) != null)
-					return BadRequest("This user is already moderator.");
+			var blog = await _context.Blog.Include(m => m.BlogModerators).FirstOrDefaultAsync(m => m.BlogId == id);
+			if (blog == null)
+				return NotFound();
 
-				blog.BlogModerators.Add(new BlogModerator() { Blog = blog, Moderator = user });
-				_context.Update(blog);
-				await _context.SaveChangesAsync();
+			if (blog.BlogModerators.FirstOrDefault(m => m.ModeratorId == user.Id) != null)
+				return BadRequest("This user is already moderator.");
 
-				return PartialView("~/Views/Blogs/ModeratorsPartial.cshtml", blog.BlogModerators);
-			}
+			blog.BlogModerators.Add(new BlogModerator() { Blog = blog, Moderator = user });
+			_context.Update(blog);
+			await _context.SaveChangesAsync();
+
+			return PartialView("~/Views/Blogs/ModeratorsPartial.cshtml", blog.BlogModerators);
 		}
-
 
 		[HttpPost("[Controller]/Edit/{id}/DeleteModerator")]
 		public async Task<IActionResult> DeleteModerator(int id, [FromBody] string text)
 		{
 			if (String.IsNullOrEmpty(text))
-			{
 				return BadRequest("Field can not be empty.");
-			}
 
 			var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == text);
 
 			if (user == null)
-			{
 				return NotFound("User is not found.");
-			}
 
-			else
-			{
-				var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == id);
+			var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == id);
 				if (blog == null)
 					return NotFound();
 
@@ -199,7 +188,6 @@ namespace BlogHosting.Controllers
 				await _context.SaveChangesAsync();
 
 				return PartialView("~/Views/Blogs/ModeratorsPartial.cshtml", blog.BlogModerators);
-			}
 		}
 
 		// GET: Blogs/Create
