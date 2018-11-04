@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogHosting.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20181103075039_AddAdminRole")]
-    partial class AddAdminRole
+    [Migration("20181104094217_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,6 +34,8 @@ namespace BlogHosting.Migrations
                     b.Property<DateTime>("CreatedDateTime");
 
                     b.Property<string>("Description");
+
+                    b.Property<string>("ImagePath");
 
                     b.Property<DateTime>("UpdatedDateTime");
 
@@ -105,6 +107,8 @@ namespace BlogHosting.Migrations
                     b.Property<int?>("BlogId");
 
                     b.Property<DateTime>("CreatedDateTime");
+
+                    b.Property<string>("ImagePath");
 
                     b.Property<string>("Text");
 
@@ -195,6 +199,19 @@ namespace BlogHosting.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("BlogHosting.Models.BlogModerator", b =>
+                {
+                    b.Property<int>("BlogId");
+
+                    b.Property<string>("ModeratorId");
+
+                    b.HasKey("BlogId", "ModeratorId");
+
+                    b.HasIndex("ModeratorId");
+
+                    b.ToTable("BlogModerator");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -219,7 +236,7 @@ namespace BlogHosting.Migrations
                     b.ToTable("AspNetRoles");
 
                     b.HasData(
-                        new { Id = "67775d0a-f281-4afe-a474-aaa7e7b77e64", ConcurrencyStamp = "4f2fce6b-e53a-48f5-8f3b-21cf99c6abe9", Name = "Admin", NormalizedName = "ADMIN" }
+                        new { Id = "bad1b9fd-14f9-4c4a-92e8-b1ce19040d0a", ConcurrencyStamp = "d935b70c-bcc5-4e05-897e-66191c3ebd65", Name = "Admin", NormalizedName = "ADMIN" }
                     );
                 });
 
@@ -312,8 +329,9 @@ namespace BlogHosting.Migrations
             modelBuilder.Entity("BlogH.Models.Blog", b =>
                 {
                     b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId");
+                        .WithMany("Blogs")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("BlogH.Models.Comment", b =>
@@ -347,13 +365,14 @@ namespace BlogHosting.Migrations
             modelBuilder.Entity("BlogH.Models.Post", b =>
                 {
                     b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId");
+                        .WithMany("Posts")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("BlogH.Models.Blog", "Blog")
                         .WithMany("Posts")
                         .HasForeignKey("BlogId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("BlogH.Models.Tag", b =>
@@ -362,6 +381,19 @@ namespace BlogHosting.Migrations
                         .WithMany("Tags")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("BlogHosting.Models.BlogModerator", b =>
+                {
+                    b.HasOne("BlogH.Models.Blog", "Blog")
+                        .WithMany("BlogModerators")
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("BlogHosting.Models.ApplicationUser", "Moderator")
+                        .WithMany("BlogModerator")
+                        .HasForeignKey("ModeratorId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

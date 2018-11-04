@@ -11,9 +11,9 @@ namespace BlogH.Models
 	{
 		public int CommentId { get; set; }
 
-		public Post Post { get; set; }
+		public virtual Post Post { get; set; }
 
-		public ApplicationUser Author { get; set; }
+		public virtual ApplicationUser Author { get; set; }
 
 		public string Text { get; set; }
 
@@ -21,7 +21,7 @@ namespace BlogH.Models
 
 		public DateTime UpdatedDate { get; set; }
 
-		public List<Comment> ChildComments { get; set; }
+		public virtual List<Comment> ChildComments { get; set; }
 
 		public int ParentCommentId { get; set; }
 	}

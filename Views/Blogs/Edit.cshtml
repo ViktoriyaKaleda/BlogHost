@@ -1,9 +1,7 @@
-﻿@model BlogH.Models.Blog
-
+﻿@model BlogHosting.Models.BlogViewModels.BlogEditViewModel
 @{
     ViewData["Title"] = "Edit";
 }
-
 <h2>Edit Blog</h2>
 <p>
     <a asp-action="Delete" asp-route-id="@Model.BlogId">Delete this Blog</a>
@@ -11,7 +9,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="BlogId" />
             <div class="form-group">
@@ -25,16 +23,102 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" id="imageBrowse" class="custom-file-input" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Moderators:</label>                
+                <div id="postsContainer">
+                    <partial name="~/Views/Blogs/ModeratorsPartial.cshtml" model="@Model.Moderators" />
+                </div>
+                <dl id="addBtnContainer" class="dl-horizontal">
+                    <content>
+                        <div id="errorBox" style="display: none;">
+                            <p><span id="errorMessage" name="errorMessage" class="text-danger" /></p>
+                        </div>
+                        <div id="messageBox" style="display: none;">
+                            <p><span id="message" name="message" class="text-info" /></p>
+                        </div>
+                        <div id="successBox" style="display: none;">
+                            <p><span id="successMessage" name="successMessage" class="text-success" /></p>
+                        </div>
+                    </content>
+                    <dt><input id="newModerator" class="form-control" /></dt>
+                    <dd><a id="addNewModerator" class="btn btn-primary">Add new</a></dd>
+                </dl>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
         </form>
     </div>
 </div>
-
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
-
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function AddModerator(inputText) {
+            $.ajax({
+                url: @Model.BlogId + "/AddModerator",
+                type: 'POST',
+                data: JSON.stringify(inputText),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'html',
+                success: (result) => {
+                    $('#postsContainer').html(result);
+                    $('#successBox').show();
+                    $('#successMessage').text("Moderator was added.");
+                    $('#successMessage').delay(3000).hide(1);
+                    addDeleteListener();
+                },
+                error: function (jxqr, error, status) {
+                    $('#errorBox').show();
+                    $('#errorMessage').text(jxqr.responseText);
+                    $('#errorMessage').delay(3000).hide(1);
+                },
+            })
+        }
+
+        function DeleteModerator(inputText) {
+            $.ajax({
+                url: @Model.BlogId + "/DeleteModerator",
+                type: 'POST',
+                data: JSON.stringify(inputText),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'html',
+                success: (result) => {
+                    $('#postsContainer').html(result);
+                    $('#messageBox').show();
+                    $('#message').text("Moderator was deleted.");
+                    $('#message').delay(3000).hide(1);
+                },
+            })
+        }
+
+
+        function addDeleteListener() {
+            var deleteButtons = document.getElementsByClassName("deleteModerator");
+            for (let i = 0; i < deleteButtons.length; i++) {
+                deleteButtons[i].addEventListener("click", function (event) {
+                    const userName = this.getAttribute('data-username');
+                    DeleteModerator(userName);
+                    event.preventDefault();
+                })
+            };
+        }
+
+        $(document).ready(() => {
+            $('#addNewModerator').mousedown(() => {
+                const t = $('#newModerator').val();
+                AddModerator(t);
+            });
+
+            addDeleteListener();
+        });
+    </script>
+
 }

@@ -12,6 +12,8 @@ using BlogHosting.Models.BlogViewModels;
 using BlogHosting.Models;
 using Microsoft.AspNetCore.Authorization;
 using BlogHosting.Models.PageNavigationViewModels;
+using System.Net.Http;
+using System.Net;
 
 namespace BlogHosting.Controllers
 {
@@ -136,6 +138,70 @@ namespace BlogHosting.Controllers
 			return PartialView("~/Views/Posts/PostPartial.cshtml", posts);
 		}
 
+		[HttpPost("[Controller]/Edit/{id}/AddModerator")]
+		public async Task<IActionResult> AddModerator(int id, [FromBody] string text)
+		{
+			if (String.IsNullOrEmpty(text))
+			{
+				return BadRequest("Field can not be empty.");
+			}				
+
+			var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == text);
+
+			if (user == null)
+			{
+				return NotFound("User is not found.");
+			}
+
+			else
+			{
+				var blog = await _context.Blog.Include(m => m.BlogModerators).FirstOrDefaultAsync(m => m.BlogId == id);
+				if (blog == null)
+					return NotFound();
+
+				if (blog.BlogModerators.FirstOrDefault(m => m.ModeratorId == user.Id) != null)
+					return BadRequest("This user is already moderator.");
+
+				blog.BlogModerators.Add(new BlogModerator() { Blog = blog, Moderator = user });
+				_context.Update(blog);
+				await _context.SaveChangesAsync();
+
+				return PartialView("~/Views/Blogs/ModeratorsPartial.cshtml", blog.BlogModerators);
+			}
+		}
+
+
+		[HttpPost("[Controller]/Edit/{id}/DeleteModerator")]
+		public async Task<IActionResult> DeleteModerator(int id, [FromBody] string text)
+		{
+			if (String.IsNullOrEmpty(text))
+			{
+				return BadRequest("Field can not be empty.");
+			}
+
+			var user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == text);
+
+			if (user == null)
+			{
+				return NotFound("User is not found.");
+			}
+
+			else
+			{
+				var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == id);
+				if (blog == null)
+					return NotFound();
+
+				var oldModerator = blog.BlogModerators.FirstOrDefault(m => m.ModeratorId == user.Id);
+
+				_context.BlogModerator.Remove(oldModerator);
+
+				await _context.SaveChangesAsync();
+
+				return PartialView("~/Views/Blogs/ModeratorsPartial.cshtml", blog.BlogModerators);
+			}
+		}
+
 		// GET: Blogs/Create
 		[Authorize]
 		public IActionResult Create()
@@ -182,7 +248,16 @@ namespace BlogHosting.Controllers
 			var isOwner = await _authorizationService.AuthorizeAsync(User, blog, "OwnerPolicy");
 			if (isOwner.Succeeded)
 			{
-				return View(blog);
+				var viewModel = new BlogEditViewModel()
+				{
+					BlogId = (int)id,
+					BlogName = blog.BlogName,
+					Description = blog.Description,
+					ImagePath = blog.ImagePath,
+					Moderators = blog.BlogModerators
+				};
+
+				return View(viewModel);
 			}
 
 			else
@@ -262,7 +337,17 @@ namespace BlogHosting.Controllers
 		public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var blog = await _context.Blog.FindAsync(id);
-            _context.Blog.Remove(blog);
+
+			if (blog.BlogModerators.Count != 0)
+			{
+				foreach (var blogModerator in blog.BlogModerators)
+				{
+					_context.BlogModerator.Remove(blogModerator);
+				}
+				await _context.SaveChangesAsync();
+			}
+
+			_context.Blog.Remove(blog);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

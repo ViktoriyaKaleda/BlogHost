@@ -39,7 +39,8 @@ namespace BlogHosting
 			});
 
 			services.AddDbContext<ApplicationDbContext>(options =>
-				options.UseSqlServer(
+				options.UseLazyLoadingProxies()
+					.UseSqlServer(
 					Configuration.GetConnectionString("DefaultConnection")));
 
 			services.AddIdentity<ApplicationUser, IdentityRole>()

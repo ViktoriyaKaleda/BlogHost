@@ -656,6 +656,16 @@ namespace BlogHosting.Controllers
 		public async Task<IActionResult> DeleteConfirmed(string id)
 		{
 			var user = await _userManager.FindByIdAsync(id);
+			var blogModeratros = await _context.BlogModerator.Where(m => m.ModeratorId == user.Id).ToListAsync();
+
+			if (blogModeratros.Count() != 0)
+			{
+				foreach (var blogModerator in blogModeratros)
+				{
+					_context.BlogModerator.Remove(blogModerator);
+				}
+				await _context.SaveChangesAsync();
+			}
 
 			_context.UserLogins.RemoveRange(_context.UserLogins.Where(ul => ul.UserId == user.Id));
 

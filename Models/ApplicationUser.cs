@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BlogH.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlogHosting.Models
@@ -13,5 +15,11 @@ namespace BlogHosting.Models
 
 		[DataType(DataType.Upload)]
 		public string AvatarPath { get; set; }
+
+		public virtual List<Blog> Blogs { get; set; }
+
+		public virtual List<Post> Posts { get; set; }
+
+		public virtual List<BlogModerator> BlogModerator { get; set; }
 	}
 }
