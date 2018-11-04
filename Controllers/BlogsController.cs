@@ -12,8 +12,6 @@ using BlogHosting.Models.BlogViewModels;
 using BlogHosting.Models;
 using Microsoft.AspNetCore.Authorization;
 using BlogHosting.Models.PageNavigationViewModels;
-using System.Net.Http;
-using System.Net;
 
 namespace BlogHosting.Controllers
 {
@@ -65,11 +63,6 @@ namespace BlogHosting.Controllers
             }
 
 			var blog = await _context.Blog
-				.Include(m => m.Author)
-				.Include(m => m.Posts).ThenInclude(m => m.Comments)
-				.Include(m => m.Posts).ThenInclude(m => m.Likes)
-				.Include(m => m.Posts).ThenInclude(m => m.Author)
-				.Include(m => m.Posts).ThenInclude(m => m.Tags)
 				.SingleOrDefaultAsync(m => m.BlogId == id);
 
 			if (blog == null)
@@ -112,8 +105,6 @@ namespace BlogHosting.Controllers
 		public async Task<IActionResult> Search([FromBody] string text)
 		{
 			var posts = await _context.Post
-				.Include(m => m.Tags)
-				.Include(m => m.Author)
 				.OrderByDescending(m => m.CreatedDateTime)
 				.Where(
 					m => m.Title.Contains(text)
@@ -227,7 +218,7 @@ namespace BlogHosting.Controllers
                 return NotFound();
             }
 
-            var blog = await _context.Blog.Include(m => m.Author).FirstOrDefaultAsync(m => m.BlogId == id);
+            var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == id);
             if (blog == null)
             {
                 return NotFound();
@@ -300,7 +291,7 @@ namespace BlogHosting.Controllers
                 return NotFound();
             }
 
-			var blog = await _context.Blog.Include(m => m.Author).FirstOrDefaultAsync(m => m.BlogId == id);
+			var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == id);
 			if (blog == null)
 			{
 				return NotFound();

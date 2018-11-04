@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BlogH.Models;
 using BlogHosting.Data;
@@ -15,7 +14,7 @@ using BlogHosting.Models;
 
 namespace BlogHosting.Controllers
 {
-    public class PostsController : Controller
+	public class PostsController : Controller
     {
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<ApplicationUser> _userManager;
@@ -47,11 +46,6 @@ namespace BlogHosting.Controllers
 			}
 
 			var post = await _context.Post
-				.Include(m => m.Comments).ThenInclude(m => m.Author)
-				.Include(m => m.Comments).ThenInclude(m => m.ChildComments).ThenInclude(m => m.Author)
-				.Include(m => m.Author)
-				.Include(m => m.Likes)
-				.Include(m => m.Tags)
 				.SingleOrDefaultAsync(m => m.PostId == id);
 
 			if (post == null)
