@@ -1,5 +1,6 @@
 ﻿using BlogH.Models;
 using BlogHosting.Data;
+using BlogHosting.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +14,9 @@ namespace BlogHosting.Hubs
 	public class CommentReplyHub : Hub
 	{
 		private readonly ApplicationDbContext _context;
-		private readonly UserManager<IdentityUser> _userManager;
+		private readonly UserManager<ApplicationUser> _userManager;
 
-		public CommentReplyHub(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+		public CommentReplyHub(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
 		{
 			_context = context;
 			_userManager = userManager;

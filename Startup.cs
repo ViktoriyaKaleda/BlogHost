@@ -84,7 +84,10 @@ namespace BlogHosting
 				options.AccessDeniedPath = $"/account/access-denied";
 			});
 
-			services.AddSignalR();
+			services.AddSignalR(o =>
+			{
+				o.EnableDetailedErrors = true;
+			});
 
 			services.AddAuthorization(options =>
 			{
