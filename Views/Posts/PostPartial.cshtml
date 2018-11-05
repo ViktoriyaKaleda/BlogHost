@@ -6,7 +6,7 @@
 {
     <div class="grid">
         <div class="entry-media">
-            <img src="~/images/slider-1.jpg" alt="">
+            <img src="@Url.Content(post.ImagePath ?? post.Blog.ImagePath ?? "~/images/slider-1.jpg")" alt="">
         </div>
         <div class="entry-body">
             <span class="cat">@post.Author.UserName</span>

@@ -7,24 +7,28 @@
         <div class="col-lg-8">
             <!-- Title -->
             <h1 class="mt-4">@Model.Title.ToUpper()</h1>
-            @if ((await AuthorizationService.AuthorizeAsync(User, Model, "OwnerPolicy")).Succeeded)
-            {
-                <a asp-action="Edit" asp-route-id="@Model.PostId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
-            }
             <!-- Author -->
             <p class="lead">
                 @Localizer["by"] @Model.Author.UserName
             </p>
+            @if ((await AuthorizationService.AuthorizeAsync(User, Model, "OwnerPolicy")).Succeeded)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.PostId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Model, "OwnerPolicy")).Succeeded
+             || (await AuthorizationService.AuthorizeAsync(User, Model.Blog, "ModeratorPolicy")).Succeeded)
+            {
+                <a asp-action="Delete" asp-route-id="@Model.PostId">Delete</a>
+            }
             <!-- Date/Time -->
             <p>@Localizer["Posted on"] @Model.CreatedDateTime.ToShortDateString() @Localizer["at"] @Model.CreatedDateTime.ToShortTimeString()</p>
             <hr>
             <!-- Image -->
-            <img class="rounded img-responsive" src="~/images/slider-1.jpg" alt="">
+            <img class="rounded img-responsive" src="@Url.Content(Model.ImagePath ?? Model.Blog.ImagePath ?? "~/images/slider-1.jpg")" alt="">
             <hr>
             <!-- Post Content -->
             <p>@Model.Text</p>
             <hr>
-
             <ul class="tags">
                 @foreach (var tag in @Model.Tags)
                 {
@@ -59,7 +63,6 @@
                 </div>
             </div>
             <h3 id="comments">@Localizer["Comments"] (@($"{Model.Comments?.Count ?? 0}"))</h3>
-
             @if (Model.Comments?.Count > 0)
             {
                 <br />
@@ -68,9 +71,73 @@
                     <partial name="~/Views/Posts/CommentPartial.cshtml" model="@comment" />
                 }
             }
+            <content>
+                <div id="errorBox">
+                    <span style="display: none;" id="errorMessage" name="errorMessage" class="text-danger" />
+                </div>
+                <div id="messageBox">
+                    <span style="display: none;" id="infoMessage" name="message" class="text-info" />
+                </div>
+                <div id="successBox">
+                    <span style="display: none;" id="successMessage" name="successMessage" class="text-success" />
+                </div>
+            </content>
         </div>
         <div class="col-md-4">
             @await Component.InvokeAsync("MostPopularPosts", new { authorId = Model.Author.Id, postId = Model.PostId })
         </div>
     </div>
 </div>
+
+
+@section Scripts {
+<script>
+    function ShowMessage(msg, element) {
+        element.text(msg);
+        if (element.is(":hidden")) {
+            element.toggle();
+            setTimeout(function () {
+                element.fadeOut('fast');
+            }, 3000);
+        }
+    }
+
+    function DeleteComment(inputText) {
+        $.ajax({
+            url: "/DeleteComment",
+            type: 'POST',
+            data: JSON.stringify(inputText),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'html',
+            success: (result) => {
+                $('#postsContainer').html(result);
+                ShowMessage("Moderator was added.", $('#successMessage'));
+                addDeleteListener();
+            },
+            error: function (jxqr, error, status) {
+                ShowMessage(jxqr.responseText, $('#errorMessage'));
+            },
+        })
+    }
+
+    $(document).ready(() => {
+
+        function addDeleteListener() {
+            var deleteButtons = document.getElementsByClassName("deleteBtn");
+            for (let i = 0; i < deleteButtons.length; i++) {
+                deleteButtons[i].addEventListener("click", function (event) {
+                    const commentId = this.getAttribute('id');
+                    DeleteComment(commentId);
+                    event.preventDefault();
+                })
+            };
+        }
+
+        addDeleteListener();
+    });
+
+     document.body.style.background = "@Model.Blog.BlogStyle.BackgrounsColor";
+                document.body.style.color = "@Model.Blog.BlogStyle.TitlesFontColor";
+                document.body.style.fontFamily = "@Model.Blog.BlogStyle.TitlesFontName";
+    </script>
+} 

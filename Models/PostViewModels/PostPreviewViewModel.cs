@@ -1,5 +1,4 @@
 ﻿using BlogH.Models;
-using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 
@@ -24,5 +23,9 @@ namespace BlogHosting.Models.PostViewModels
 		public int LikesNumber { get; set; }
 
 		public int CommentsNumber { get; set; }
+
+		public string ImagePath { get; set; }
+
+		public Blog Blog { get; set; }
 	}
 }

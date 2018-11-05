@@ -22,6 +22,7 @@ namespace BlogHosting.Data
 		public DbSet<BlogH.Models.Comment> Comment { get; set; }
 		public DbSet<BlogH.Models.Tag> Tag { get; set; }
 		public DbSet<BlogModerator> BlogModerator { get; set; }
+		public DbSet<BlogStyle> BlogStyle { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -75,6 +76,35 @@ namespace BlogHosting.Data
 			builder.Entity<Tag>().Property(m => m.PostId).IsRequired();
 
 			builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "Admin".ToUpper() });
+
+			builder.Entity<BlogStyle>()
+				.HasMany(m => m.Blogs)
+				.WithOne(m => m.BlogStyle)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<BlogStyle>().HasData(new BlogStyle()
+			{
+				BlogStyleId = 1,
+				BlogStyleName = "Soft",
+				DefaultImagePath = "~/images/blog-header6.jpg",
+				FisrtColor = "#000000",
+				SecondColor = "#FFA500",
+				TitlesFontColor = "#763eb6",
+				TitlesFontName = "Concert One, cursive",
+				BackgrounsColor = "#eeeeee"
+			});
+
+			builder.Entity<BlogStyle>().HasData(new BlogStyle()
+			{
+				BlogStyleId = 2,
+				BlogStyleName = "Default",
+				DefaultImagePath = "~/images/slider-1.jpg",
+				FisrtColor = "#000000",
+				SecondColor = "",
+				TitlesFontColor = "#",
+				TitlesFontName = "",
+				BackgrounsColor = ""
+			});
 		}
 	}
 }

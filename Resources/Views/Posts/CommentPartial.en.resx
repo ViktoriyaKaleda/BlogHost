@@ -126,4 +126,7 @@
   <data name="Reply" xml:space="preserve">
     <value>Reply</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
 </root>

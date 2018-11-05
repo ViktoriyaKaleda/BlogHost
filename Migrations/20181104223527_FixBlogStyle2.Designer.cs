@@ -4,14 +4,16 @@ using BlogHosting.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlogHosting.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181104223527_FixBlogStyle2")]
+    partial class FixBlogStyle2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,8 +241,7 @@ namespace BlogHosting.Migrations
                     b.ToTable("BlogStyle");
 
                     b.HasData(
-                        new { BlogStyleId = 1, BackgrounsColor = "#eeeeee", BlogStyleName = "Soft", DefaultImagePath = "~/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "#FFA500", TitlesFontColor = "#763eb6", TitlesFontName = "Concert One, cursive" },
-                        new { BlogStyleId = 2, BackgrounsColor = "", BlogStyleName = "Default", DefaultImagePath = "~/images/slider-1.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#", TitlesFontName = "" }
+                        new { BlogStyleId = 1, BackgrounsColor = "#E6D6C0", BlogStyleName = "Soft", DefaultImagePath = "~/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#763eb6", TitlesFontName = "font-family: 'Concert One', cursive;" }
                     );
                 });
 
@@ -268,7 +269,7 @@ namespace BlogHosting.Migrations
                     b.ToTable("AspNetRoles");
 
                     b.HasData(
-                        new { Id = "35f5a44b-d198-40c7-82fb-87df861d4e4d", ConcurrencyStamp = "4610d087-ec59-4a5c-84ce-af23c5eeab64", Name = "Admin", NormalizedName = "ADMIN" }
+                        new { Id = "14f52813-71e4-48fa-a109-acd21354b92b", ConcurrencyStamp = "65649be9-1eab-4e6f-a620-ea40f072bbe4", Name = "Admin", NormalizedName = "ADMIN" }
                     );
                 });
 

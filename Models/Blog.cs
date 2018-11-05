@@ -26,6 +26,8 @@ namespace BlogH.Models
 
 		public virtual List<BlogModerator> BlogModerators { get; set; }
 
+		public virtual BlogStyle BlogStyle { get; set; }
+
 		[DataType(DataType.Upload)]
 		public string ImagePath { get; set; }
 

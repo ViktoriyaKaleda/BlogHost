@@ -4,14 +4,16 @@ using BlogHosting.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlogHosting.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181104222744_AddBlogStyle1")]
+    partial class AddBlogStyle1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -222,8 +224,6 @@ namespace BlogHosting.Migrations
 
                     b.Property<string>("BackgrounsColor");
 
-                    b.Property<string>("BlogStyleName");
-
                     b.Property<string>("DefaultImagePath");
 
                     b.Property<string>("FisrtColor");
@@ -239,8 +239,7 @@ namespace BlogHosting.Migrations
                     b.ToTable("BlogStyle");
 
                     b.HasData(
-                        new { BlogStyleId = 1, BackgrounsColor = "#eeeeee", BlogStyleName = "Soft", DefaultImagePath = "~/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "#FFA500", TitlesFontColor = "#763eb6", TitlesFontName = "Concert One, cursive" },
-                        new { BlogStyleId = 2, BackgrounsColor = "", BlogStyleName = "Default", DefaultImagePath = "~/images/slider-1.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#", TitlesFontName = "" }
+                        new { BlogStyleId = 1, BackgrounsColor = "#E6D6C0", DefaultImagePath = "~/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#763eb6", TitlesFontName = "font-family: 'Concert One', cursive;" }
                     );
                 });
 
@@ -268,7 +267,7 @@ namespace BlogHosting.Migrations
                     b.ToTable("AspNetRoles");
 
                     b.HasData(
-                        new { Id = "35f5a44b-d198-40c7-82fb-87df861d4e4d", ConcurrencyStamp = "4610d087-ec59-4a5c-84ce-af23c5eeab64", Name = "Admin", NormalizedName = "ADMIN" }
+                        new { Id = "e9ad8a58-a880-4d13-b20d-3aaf2f18f46d", ConcurrencyStamp = "c34b2c03-6dc7-4d2e-b2ef-22dfc6bea36f", Name = "Admin", NormalizedName = "ADMIN" }
                     );
                 });
 
@@ -366,9 +365,8 @@ namespace BlogHosting.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("BlogHosting.Models.BlogStyle", "BlogStyle")
-                        .WithMany("Blogs")
-                        .HasForeignKey("BlogStyleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany()
+                        .HasForeignKey("BlogStyleId");
                 });
 
             modelBuilder.Entity("BlogH.Models.Comment", b =>

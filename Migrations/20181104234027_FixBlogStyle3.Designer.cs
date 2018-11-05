@@ -4,14 +4,16 @@ using BlogHosting.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlogHosting.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181104234027_FixBlogStyle3")]
+    partial class FixBlogStyle3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,7 +241,7 @@ namespace BlogHosting.Migrations
                     b.ToTable("BlogStyle");
 
                     b.HasData(
-                        new { BlogStyleId = 1, BackgrounsColor = "#eeeeee", BlogStyleName = "Soft", DefaultImagePath = "~/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "#FFA500", TitlesFontColor = "#763eb6", TitlesFontName = "Concert One, cursive" },
+                        new { BlogStyleId = 1, BackgrounsColor = "#E6D6C0", BlogStyleName = "Soft", DefaultImagePath = "~/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#763eb6", TitlesFontName = "'Concert One', cursive" },
                         new { BlogStyleId = 2, BackgrounsColor = "", BlogStyleName = "Default", DefaultImagePath = "~/images/slider-1.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#", TitlesFontName = "" }
                     );
                 });
@@ -268,7 +270,7 @@ namespace BlogHosting.Migrations
                     b.ToTable("AspNetRoles");
 
                     b.HasData(
-                        new { Id = "35f5a44b-d198-40c7-82fb-87df861d4e4d", ConcurrencyStamp = "4610d087-ec59-4a5c-84ce-af23c5eeab64", Name = "Admin", NormalizedName = "ADMIN" }
+                        new { Id = "bab519de-d700-466f-82b8-8bb2ed7d12ed", ConcurrencyStamp = "67dccb80-4474-4d75-a5cb-f4d8e69c5562", Name = "Admin", NormalizedName = "ADMIN" }
                     );
                 });
 

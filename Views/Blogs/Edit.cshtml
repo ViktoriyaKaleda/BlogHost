@@ -6,8 +6,11 @@
 <p>
     <a asp-action="Delete" asp-route-id="@Model.BlogId">Delete this Blog</a>
 </p>
+
+<img class="rounded img-responsive center-block" id="targetImg" src="@Url.Content(Model.ImagePath ?? "~/images/slider-1.jpg")" alt="">
+
 <hr />
-<div class="row">
+<div class="row" style="background-color:@Model.CurrentStyle.BackgrounsColor">
     <div class="col-md-4">
         <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -28,7 +31,12 @@
                 <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label class="control-label">Moderators:</label>                
+                <label asp-for="BlogStyleId" class="control-label"></label>
+                <select asp-for="BlogStyleId" id="styleSelect" class="form-control" asp-items="@Model.Styles"></select>
+                <span asp-validation-for="BlogStyleId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Moderators:</label>
                 <div id="postsContainer">
                     <partial name="~/Views/Blogs/ModeratorsPartial.cshtml" model="@Model.Moderators" />
                 </div>
@@ -49,7 +57,7 @@
                 </dl>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
+                <input type="submit" value="Save" class="btn btn-success" />
             </div>
         </form>
     </div>
@@ -59,8 +67,8 @@
 </div>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-
     <script>
+
         function AddModerator(inputText) {
             $.ajax({
                 url: @Model.BlogId + "/AddModerator",
@@ -114,6 +122,53 @@
             };
         }
 
+        var ReadImage = function (file) {
+
+            var reader = new FileReader;
+            var image = new Image;
+
+            reader.readAsDataURL(file);
+            reader.onload = function (_file) {
+
+                image.src = _file.target.result;
+                image.onload = function () {
+
+                    var height = this.height;
+                    var width = this.width;
+                    var type = file.type;
+                    var size = ~~(file.size / 1024) + "KB";
+
+                    $("#targetImg").attr('src', _file.target.result);
+                    $("#imagePreview").show();
+                }
+            }
+        }
+
+        var ClearPreview = function () {
+            $("#imageBrowse").val('');
+            $("#imagePreview").hide();
+        }
+
+        function SetStyle(styleId) {
+            $.ajax({
+                url: @Model.BlogId + "/SetStyle",
+                type: 'POST',
+                data: JSON.stringify(styleId),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'html',
+                success: (result) => {
+                    console.log(result);
+                    console.log(result.backgrounsColor);
+                    const style = JSON.parse(result);
+                    document.body.style.background = style.backgrounsColor;
+
+                    document.body.style.color = style.titlesFontColor;
+                    document.body.style.fontFamily = style.titlesFontName;
+                    $('.navbar')[0].style.color = style.secondColor;
+                },
+            })
+        }
+
         $(document).ready(() => {
             $('#addNewModerator').mousedown(() => {
                 const t = $('#newModerator').val();
@@ -121,7 +176,20 @@
             });
 
             addDeleteListener();
+
+            $("#imageBrowse").change(function () {
+
+                var File = this.files;
+
+                if (File && File[0]) {
+                    ReadImage(File[0]);
+                }
+            })
+
+            $('#styleSelect').change(function () {
+                const styleId = $('#styleSelect').val();
+                SetStyle(styleId);
+            })
         });
     </script>
-
 }
