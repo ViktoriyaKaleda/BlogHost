@@ -4,14 +4,16 @@ using BlogHosting.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlogHosting.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181105054323_AddMoreStyles")]
+    partial class AddMoreStyles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,10 +241,10 @@ namespace BlogHosting.Migrations
                     b.ToTable("BlogStyle");
 
                     b.HasData(
-                        new { BlogStyleId = 1, BackgrounsColor = "", BlogStyleName = "Default", DefaultImagePath = "/images/slider-1.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#", TitlesFontName = "" },
-                        new { BlogStyleId = 2, BackgrounsColor = "#eeeeee", BlogStyleName = "Soft", DefaultImagePath = "/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "#FFA500", TitlesFontColor = "#763eb6", TitlesFontName = "Concert One, cursive" },
-                        new { BlogStyleId = 3, BackgrounsColor = "#F9F2FA", BlogStyleName = "Gentle", DefaultImagePath = "/images/blog-header3.jpg", FisrtColor = "#000000", SecondColor = "#B6798F", TitlesFontColor = "#763eb6", TitlesFontName = "Cormorant, serif" },
-                        new { BlogStyleId = 4, BackgrounsColor = "#C7C0E0", BlogStyleName = "Ultraviolet", DefaultImagePath = "/images/blog-header4.jpg", FisrtColor = "#000000", SecondColor = "#001b8a", TitlesFontColor = "#763eb6", TitlesFontName = "PT Sans, sans-serif" }
+                        new { BlogStyleId = 1, BackgrounsColor = "", BlogStyleName = "Default", DefaultImagePath = "~/images/slider-1.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#", TitlesFontName = "" },
+                        new { BlogStyleId = 2, BackgrounsColor = "#eeeeee", BlogStyleName = "Soft", DefaultImagePath = "~/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "#FFA500", TitlesFontColor = "#763eb6", TitlesFontName = "Concert One, cursive" },
+                        new { BlogStyleId = 3, BackgrounsColor = "#F9F2FA", BlogStyleName = "Gentle", DefaultImagePath = "~/images/blog-header3.jpg", FisrtColor = "#000000", SecondColor = "#B6798F", TitlesFontColor = "#763eb6", TitlesFontName = "Cormorant, serif" },
+                        new { BlogStyleId = 4, BackgrounsColor = "#C7C0E0", BlogStyleName = "Ultraviolet", DefaultImagePath = "~/images/blog-header4.jpg", FisrtColor = "#000000", SecondColor = "#001b8a", TitlesFontColor = "#763eb6", TitlesFontName = "Cormorant, serif" }
                     );
                 });
 
@@ -270,7 +272,7 @@ namespace BlogHosting.Migrations
                     b.ToTable("AspNetRoles");
 
                     b.HasData(
-                        new { Id = "918a43cb-91f9-4b2d-af9a-681f0b7fe4b7", ConcurrencyStamp = "3ae6f288-059f-4748-8817-279631402c53", Name = "Admin", NormalizedName = "ADMIN" }
+                        new { Id = "f5122a7e-73ab-4954-ba28-3a424b2a2b46", ConcurrencyStamp = "5b263d95-7150-423e-b69d-75f8eac3ff99", Name = "Admin", NormalizedName = "ADMIN" }
                     );
                 });
 

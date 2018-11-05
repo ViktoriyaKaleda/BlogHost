@@ -193,9 +193,20 @@ namespace BlogHosting.Controllers
 
 		// GET: Blogs/Create
 		[Authorize]
-		public IActionResult Create()
+		public async Task<IActionResult> Create()
 		{
-			return View();
+			var styles = await _context.BlogStyle.ToListAsync();
+			var selectItems = new List<SelectListItem>();
+			foreach (var style in styles)
+			{
+				selectItems.Add(new SelectListItem() { Text = style.BlogStyleName, Value = style.BlogStyleId.ToString() });
+			}
+
+			var viewModel = new BlogCreateViewModel()
+			{
+				Styles = selectItems,
+			};
+			return View(viewModel);
 		}
 
 		// POST: Blogs/Create
@@ -216,6 +227,12 @@ namespace BlogHosting.Controllers
 					CreatedDateTime = DateTime.Now,
 					UpdatedDateTime = DateTime.Now,
 				};
+
+				var style = await _context.BlogStyle.SingleOrDefaultAsync(m => m.BlogStyleId == viewModel.BlogStyleId);
+
+				blog.BlogStyle = style;
+
+				blog.ImagePath = style.DefaultImagePath;
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
@@ -319,6 +336,8 @@ namespace BlogHosting.Controllers
 				var style = await _context.BlogStyle.SingleOrDefaultAsync(m => m.BlogStyleId == viewModel.BlogStyleId);
 
 				blog.BlogStyle = style;
+
+				blog.ImagePath = style.DefaultImagePath;
 
 				if (viewModel.ImageFile?.FileName != null)
 				{

@@ -85,8 +85,20 @@ namespace BlogHosting.Data
 			builder.Entity<BlogStyle>().HasData(new BlogStyle()
 			{
 				BlogStyleId = 1,
+				BlogStyleName = "Default",
+				DefaultImagePath = "/images/slider-1.jpg",
+				FisrtColor = "#000000",
+				SecondColor = "",
+				TitlesFontColor = "#",
+				TitlesFontName = "",
+				BackgrounsColor = ""
+			});
+
+			builder.Entity<BlogStyle>().HasData(new BlogStyle()
+			{
+				BlogStyleId = 2,
 				BlogStyleName = "Soft",
-				DefaultImagePath = "~/images/blog-header6.jpg",
+				DefaultImagePath = "/images/blog-header6.jpg",
 				FisrtColor = "#000000",
 				SecondColor = "#FFA500",
 				TitlesFontColor = "#763eb6",
@@ -96,15 +108,28 @@ namespace BlogHosting.Data
 
 			builder.Entity<BlogStyle>().HasData(new BlogStyle()
 			{
-				BlogStyleId = 2,
-				BlogStyleName = "Default",
-				DefaultImagePath = "~/images/slider-1.jpg",
+				BlogStyleId = 3,
+				BlogStyleName = "Gentle",
+				DefaultImagePath = "/images/blog-header3.jpg",
 				FisrtColor = "#000000",
-				SecondColor = "",
-				TitlesFontColor = "#",
-				TitlesFontName = "",
-				BackgrounsColor = ""
+				SecondColor = "#B6798F",
+				TitlesFontColor = "#763eb6",
+				TitlesFontName = "Cormorant, serif",
+				BackgrounsColor = "#F9F2FA"
 			});
+
+			builder.Entity<BlogStyle>().HasData(new BlogStyle()
+			{
+				BlogStyleId = 4,
+				BlogStyleName = "Ultraviolet",
+				DefaultImagePath = "/images/blog-header4.jpg",
+				FisrtColor = "#000000",
+				SecondColor = "#001b8a",
+				TitlesFontColor = "#763eb6",
+				TitlesFontName = "PT Sans, sans-serif",
+				BackgrounsColor = "#C7C0E0"
+			});
+
 		}
 	}
 }
