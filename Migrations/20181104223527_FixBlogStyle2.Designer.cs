@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogHosting.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20181101092624_Initial")]
-    partial class Initial
+    [Migration("20181104223527_FixBlogStyle2")]
+    partial class FixBlogStyle2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -31,15 +31,21 @@ namespace BlogHosting.Migrations
 
                     b.Property<string>("BlogName");
 
+                    b.Property<int?>("BlogStyleId");
+
                     b.Property<DateTime>("CreatedDateTime");
 
                     b.Property<string>("Description");
+
+                    b.Property<string>("ImagePath");
 
                     b.Property<DateTime>("UpdatedDateTime");
 
                     b.HasKey("BlogId");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("BlogStyleId");
 
                     b.ToTable("Blog");
                 });
@@ -106,6 +112,8 @@ namespace BlogHosting.Migrations
 
                     b.Property<DateTime>("CreatedDateTime");
 
+                    b.Property<string>("ImagePath");
+
                     b.Property<string>("Text");
 
                     b.Property<string>("Title");
@@ -129,7 +137,7 @@ namespace BlogHosting.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<int?>("PostId");
+                    b.Property<int>("PostId");
 
                     b.HasKey("TagId");
 
@@ -195,6 +203,48 @@ namespace BlogHosting.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("BlogHosting.Models.BlogModerator", b =>
+                {
+                    b.Property<int>("BlogId");
+
+                    b.Property<string>("ModeratorId");
+
+                    b.HasKey("BlogId", "ModeratorId");
+
+                    b.HasIndex("ModeratorId");
+
+                    b.ToTable("BlogModerator");
+                });
+
+            modelBuilder.Entity("BlogHosting.Models.BlogStyle", b =>
+                {
+                    b.Property<int>("BlogStyleId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BackgrounsColor");
+
+                    b.Property<string>("BlogStyleName");
+
+                    b.Property<string>("DefaultImagePath");
+
+                    b.Property<string>("FisrtColor");
+
+                    b.Property<string>("SecondColor");
+
+                    b.Property<string>("TitlesFontColor");
+
+                    b.Property<string>("TitlesFontName");
+
+                    b.HasKey("BlogStyleId");
+
+                    b.ToTable("BlogStyle");
+
+                    b.HasData(
+                        new { BlogStyleId = 1, BackgrounsColor = "#E6D6C0", BlogStyleName = "Soft", DefaultImagePath = "~/images/blog-header6.jpg", FisrtColor = "#000000", SecondColor = "", TitlesFontColor = "#763eb6", TitlesFontName = "font-family: 'Concert One', cursive;" }
+                    );
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -217,6 +267,10 @@ namespace BlogHosting.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles");
+
+                    b.HasData(
+                        new { Id = "14f52813-71e4-48fa-a109-acd21354b92b", ConcurrencyStamp = "65649be9-1eab-4e6f-a620-ea40f072bbe4", Name = "Admin", NormalizedName = "ADMIN" }
+                    );
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -308,8 +362,14 @@ namespace BlogHosting.Migrations
             modelBuilder.Entity("BlogH.Models.Blog", b =>
                 {
                     b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId");
+                        .WithMany("Blogs")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("BlogHosting.Models.BlogStyle", "BlogStyle")
+                        .WithMany("Blogs")
+                        .HasForeignKey("BlogStyleId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("BlogH.Models.Comment", b =>
@@ -324,7 +384,8 @@ namespace BlogHosting.Migrations
 
                     b.HasOne("BlogH.Models.Post", "Post")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("BlogH.Models.Like", b =>
@@ -335,25 +396,42 @@ namespace BlogHosting.Migrations
 
                     b.HasOne("BlogH.Models.Post", "Post")
                         .WithMany("Likes")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("BlogH.Models.Post", b =>
                 {
                     b.HasOne("BlogHosting.Models.ApplicationUser", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId");
+                        .WithMany("Posts")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("BlogH.Models.Blog", "Blog")
                         .WithMany("Posts")
-                        .HasForeignKey("BlogId");
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("BlogH.Models.Tag", b =>
                 {
                     b.HasOne("BlogH.Models.Post")
                         .WithMany("Tags")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("BlogHosting.Models.BlogModerator", b =>
+                {
+                    b.HasOne("BlogH.Models.Blog", "Blog")
+                        .WithMany("BlogModerators")
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("BlogHosting.Models.ApplicationUser", "Moderator")
+                        .WithMany("BlogModerator")
+                        .HasForeignKey("ModeratorId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -5,6 +5,9 @@
     ViewData["Title"] = "Details";
 }
 <div>
+
+    <img class="rounded img-responsive" src="@Url.Content(Model.Blog.ImagePath ?? Model.Blog.BlogStyle.DefaultImagePath)" alt="">
+
     @if ((await AuthorizationService.AuthorizeAsync(User, Model.Blog, "OwnerPolicy")).Succeeded)
     {
         <h2>
@@ -107,7 +110,13 @@ else
             $("#searchInput").keyup(() => {
                 const t = $('#searchInput').val();
                 Search(t);
+               
             });
+            
         });
+
+         document.body.style.background = "@Model.Blog.BlogStyle.BackgrounsColor";
+                document.body.style.color = "@Model.Blog.BlogStyle.TitlesFontColor";
+                document.body.style.fontFamily = "@Model.Blog.BlogStyle.TitlesFontName";
     </script>
 }

@@ -6,7 +6,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BlogHosting</title>
-
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
@@ -21,6 +20,7 @@
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
+    <link href="https://fonts.googleapis.com/css?family=Concert+One" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -38,7 +38,6 @@
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a></li>
                     <li><a asp-area="" asp-controller="Blogs" asp-action="Index">@Localizer["Blogs"]</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">@Localizer["About"]</a></li>
                 </ul>
                 <partial name="_LoginPartial" />
             </div>

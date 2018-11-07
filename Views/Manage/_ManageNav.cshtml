@@ -2,6 +2,8 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+
+    var isAdmin = Context.User.IsInRole("Admin");
 }
 
 <ul class="nav nav-pills nav-stacked">
@@ -10,6 +12,10 @@
     @if (hasExternalLogins)
     {
         <li class="@ManageNavPages.ExternalLoginsNavClass(ViewContext)"><a asp-action="ExternalLogins">External logins</a></li>
+    }
+    @if (isAdmin)
+    {
+        <li class="@ManageNavPages.ExternalLoginsNavClass(ViewContext)"><a asp-action="GetAllUsers">All users</a></li>
     }
 </ul>
 

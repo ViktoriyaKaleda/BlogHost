@@ -4,7 +4,7 @@
 
 <div class="grid">
     <div class="entry-media">
-        <img src="~/images/slider-1.jpg" alt="">
+        <img src="@Url.Content(Model.ImagePath ?? "~/images/slider-1.jpg")"  alt="">
     </div>
     <div class="entry-body">
         <span class="cat">@Model.Author.UserName</span>

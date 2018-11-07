@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BlogH.Models;
 using BlogHosting.Data;
@@ -12,57 +11,62 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Authorization;
 using BlogHosting.Models;
+using Microsoft.Extensions.Logging;
+using BlogHosting.Models.PostViewModels;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace BlogHosting.Controllers
 {
-    public class PostsController : Controller
-    {
+	public class PostsController : Controller
+	{
 		private readonly ApplicationDbContext _context;
 		private readonly UserManager<ApplicationUser> _userManager;
 		private IHostingEnvironment _appEnvironment;
+		private readonly IAuthorizationService _authorizationService;
+		private readonly ILogger _logger;
 
 		public PostsController(
 				ApplicationDbContext context,
 				UserManager<ApplicationUser> userManager,
-				IHostingEnvironment appEnvironment
+				IHostingEnvironment appEnvironment,
+				IAuthorizationService authorizationService,
+				ILogger<PostsController> logger
 			)
 		{
 			_context = context;
 			_userManager = userManager;
 			_appEnvironment = appEnvironment;
+			_authorizationService = authorizationService;
+			_logger = logger;
 		}
 
 		// GET: Posts
 		public async Task<IActionResult> Index()
-        {
-            return View(await _context.Post.ToListAsync());
-        }
+		{
+			return View(await _context.Post.ToListAsync());
+		}
 
-        // GET: Posts/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
+		// GET: Posts/Details/5
+		public async Task<IActionResult> Details(int? id)
+		{
 			if (id == null)
 			{
 				return NotFound();
 			}
 
 			var post = await _context.Post
-				.Include(m => m.Comments).ThenInclude(m => m.Author)
-				.Include(m => m.Comments).ThenInclude(m => m.ChildComments).ThenInclude(m => m.Author)
-				.Include(m => m.Author)
-				.Include(m => m.Likes)
-				.Include(m => m.Tags)
 				.SingleOrDefaultAsync(m => m.PostId == id);
 
 			if (post == null)
-            {
-                return NotFound();
-            }
+			{
+				return NotFound();
+			}
 
 			TempData["postId"] = post.PostId;
 
 			return View(post);
-        }
+		}
 
 		private List<Comment> GetChildren(List<Comment> comments, int parentId)
 		{
@@ -142,145 +146,256 @@ namespace BlogHosting.Controllers
 			return View(post);
 		}
 
-		// GET: Posts/Create
-		[HttpGet("[controller]/[action]/{blogId}")]
-		public IActionResult Create(int? blogId)
-        {
-			TempData["blogId"] = blogId;
-			return View();
-        }
+		//[HttpPost("DeleteComment")]
+		//[ValidateAntiForgeryToken]
+		//[Authorize]
+		//public async Task<IActionResult> DeleteComment(int? commentId)
+		//{
+		//	var comment = await _context.Comment.FirstOrDefaultAsync(m => m.CommentId == commentId);
+		//	var postId = comment.Post.PostId;
 
-        // POST: Posts/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PostId,Title,Text")] Post post, string[] tags)
-        {
-            if (ModelState.IsValid)
-            {
-				post.Author = await _userManager.GetUserAsync(HttpContext.User);
-				post.CreatedDateTime = DateTime.Now;
-				post.UpdatedDateTime = post.CreatedDateTime;
-				post.Blog = await _context.Blog.FirstOrDefaultAsync(b => b.BlogId == (int)TempData["blogId"]);
-				if (tags != null)
+		//	if (comment == null)
+		//		return NotFound();
+
+		//	if (!(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "OwnerPolicy")).Succeeded
+		//		&& !(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "ModeratorPolicy")).Succeeded)
+		//		return Forbid();
+
+		//	await DeleteChildComments(comment);
+
+		//	_context.Comment.Remove(comment);
+		//	await _context.SaveChangesAsync();
+
+		//	return RedirectToAction(nameof(Details), postId);
+
+		//}
+
+		private async Task DeleteChildComments(Comment comment)
+		{
+			foreach (var c in comment.ChildComments)
+			{
+				await DeleteChildComments(c);
+				c.ParentCommentId = 0;
+				_context.Comment.Update(c);
+			}
+			await _context.SaveChangesAsync();
+		}
+
+		// GET: Posts/Create
+		[Authorize]
+		[HttpGet("[controller]/[action]/{blogId}")]
+		public async Task<IActionResult> Create(int? blogId)
+		{
+			TempData["blogId"] = blogId;
+
+			var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == blogId);
+
+			if ((await _authorizationService.AuthorizeAsync(User, blog, "OwnerPolicy")).Succeeded)
+				return View(new PostCreateViewModel() { Blog = blog });
+
+			return Forbid();
+		}
+
+		// POST: Posts/Create
+		// To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+		// more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[HttpPost]
+		[Authorize]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(PostCreateViewModel viewModel)
+		{
+			if (ModelState.IsValid)
+			{
+				var post = new Post()
+				{
+					Title = viewModel.Title,
+					Text = viewModel.Text,
+					Author = await _userManager.GetUserAsync(HttpContext.User),
+					CreatedDateTime = DateTime.Now,
+					UpdatedDateTime = DateTime.Now,
+					Blog = await _context.Blog.FirstOrDefaultAsync(b => b.BlogId == (int)TempData["blogId"])
+				};
+
+				if (viewModel.StringTags != null)
 				{
 					List<Tag> postTags = new List<Tag>();
-					foreach (var tag in tags)
+					foreach (var tag in viewModel.StringTags)
 					{
-						Tag postTag = new Tag() { Name = tag };
+						Tag postTag = new Tag() { Name = tag, PostId = post.PostId };
 						_context.Tag.Add(postTag);
 						postTags.Add(postTag);
 					}
 					post.Tags = postTags;
 				}
 
+				if (viewModel.ImageFile?.FileName != null)
+				{
+					string path = GetImagePath(viewModel.ImageFile);
+
+					post.ImagePath = "~/" + path;
+
+					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
+					{
+						await viewModel.ImageFile.CopyToAsync(fileStream);
+					}
+				}
+
 				_context.Add(post);
-                await _context.SaveChangesAsync();
+				await _context.SaveChangesAsync();
 				return RedirectToAction(
 					nameof(Details),
 					"Blogs",
 					new RouteValueDictionary(new { controller = "Blogs", action = "Details", id = post.Blog.BlogId }
 				));
 			}
-            return View(post);
-        }
+			return View(viewModel);
+		}
 
-        // GET: Posts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: Posts/Edit/5
+		[Authorize]
+		public async Task<IActionResult> Edit(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var post = await _context.Post.FindAsync(id);
-            if (post == null)
-            {
-                return NotFound();
-            }
-            return View(post);
-        }
+			var post = await _context.Post.FindAsync(id);
+			if (post == null)
+			{
+				return NotFound();
+			}
 
-        // POST: Posts/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PostId,Title,Text")] Post post, string[] tags)
-        {
-            if (id != post.PostId)
-            {
-                return NotFound();
-            }
+			var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == post.Blog.BlogId);
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-					List<Tag> postTags = new List<Tag>();
-					foreach (string tagName in tags)
+			if ((await _authorizationService.AuthorizeAsync(User, blog, "OwnerPolicy")).Succeeded)
+			{
+				var viewModel = new PostEditViewModel((int)id, post.Title, post.Text, post.Tags, post.ImagePath, post.Blog);
+
+				return View(viewModel);
+			}
+
+			return Forbid();
+		}
+
+		// POST: Posts/Edit/5
+		// To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+		// more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[HttpPost]
+		[Authorize]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(int id, PostEditViewModel viewModel)
+		{
+			if (id != viewModel.PostId)
+			{
+				return NotFound();
+			}
+
+			if (ModelState.IsValid)
+			{
+				var post = _context.Post.FirstOrDefault(m => m.PostId == id);
+				if (post == null)
+					return NotFound();
+
+				post.Title = viewModel.Title;
+				post.Text = viewModel.Text;
+				post.UpdatedDateTime = DateTime.Now;
+
+				if (viewModel.ImageFile?.FileName != null)
+				{
+					if (post.ImagePath != null)
+					{
+						try
+						{
+							System.IO.File.Delete(_appEnvironment.WebRootPath + "/PostImages/" + Path.GetFileName(post.ImagePath));
+						}
+						catch (System.IO.IOException e)
+						{
+							_logger.LogWarning("Failed to delete post image file. File path: {}", post.ImagePath);
+						}
+					}
+
+					string path = GetImagePath(viewModel.ImageFile);
+
+					post.ImagePath = "~/" + path;
+
+					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
+					{
+						await viewModel.ImageFile.CopyToAsync(fileStream);
+					}
+				}
+
+				List<Tag> postTags = new List<Tag>();
+				if (viewModel.StringTags != null)
+				{
+					foreach (string tagName in viewModel.StringTags)
 					{
 						Tag tag = new Tag() { Name = tagName };
 						postTags.Add(tag);
 						_context.Tag.Add(tag);
 					}
-					post.Tags = postTags;
+				}
+				
+				post.Tags = postTags;
 
-                    _context.Update(post);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PostExists(post.PostId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+				_context.Update(post);
+				await _context.SaveChangesAsync();
+
 				return RedirectToAction(
 					nameof(Details),
 					new RouteValueDictionary(new { controller = "Posts", action = "Details", id = post.PostId }
 				));
 			}
-            return View(post);
-        }
+			return View(viewModel);
+		}
 
-        // GET: Posts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: Posts/Delete/5
+		[Authorize]
+		public async Task<IActionResult> Delete(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var post = await _context.Post
-                .FirstOrDefaultAsync(m => m.PostId == id);
-            if (post == null)
-            {
-                return NotFound();
-            }
+			var post = await _context.Post
+				.FirstOrDefaultAsync(m => m.PostId == id);
+			if (post == null)
+			{
+				return NotFound();
+			}
 
-            return View(post);
-        }
+			if ((await _authorizationService.AuthorizeAsync(User, post.Blog, "OwnerPolicy")).Succeeded
+				|| (await _authorizationService.AuthorizeAsync(User, post.Blog, "ModeratorPolicy")).Succeeded)
+				return View(post);
 
-        // POST: Posts/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var post = await _context.Post.FindAsync(id);
-            _context.Post.Remove(post);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+			return Forbid();
+		}
 
-        private bool PostExists(int id)
-        {
-            return _context.Post.Any(e => e.PostId == id);
-        }
-    }
+		// POST: Posts/Delete/5
+		[HttpPost, ActionName("Delete")]
+		[Authorize]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteConfirmed(int id)
+		{
+			var post = await _context.Post.FindAsync(id);
+			_context.Post.Remove(post);
+			await _context.SaveChangesAsync();
+			return RedirectToAction(nameof(Index), "Blogs");
+		}
+
+		private bool PostExists(int id)
+		{
+			return _context.Post.Any(e => e.PostId == id);
+		}
+
+		private string GetImagePath(IFormFile avatar)
+		{
+			string fileName = Path.GetFileNameWithoutExtension(avatar.FileName);
+			string extension = Path.GetExtension(avatar.FileName);
+			fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
+
+			return "PostImages/" + fileName;
+		}
+	}
 }

@@ -16,6 +16,7 @@ using BlogHosting.Services;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
+using BlogHosting.Configurations;
 
 namespace BlogHosting
 {
@@ -38,7 +39,8 @@ namespace BlogHosting
 			});
 
 			services.AddDbContext<ApplicationDbContext>(options =>
-				options.UseSqlServer(
+				options.UseLazyLoadingProxies()
+					.UseSqlServer(
 					Configuration.GetConnectionString("DefaultConnection")));
 
 			services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -82,12 +84,18 @@ namespace BlogHosting
 				options.AccessDeniedPath = $"/account/access-denied";
 			});
 
-			services.AddSignalR();
+			services.AddSignalR(o =>
+			{
+				o.EnableDetailedErrors = true;
+			});
 
 			services.AddAuthorization(options =>
 			{
 				options.AddPolicy("OwnerPolicy", policy =>
 					policy.Requirements.Add(new OwnerRequirement()));
+
+				options.AddPolicy("ModeratorPolicy", policy =>
+					policy.Requirements.Add(new ModeratorRequirement()));
 			});
 
 			services.AddScoped<IAuthorizationHandler,
@@ -95,10 +103,13 @@ namespace BlogHosting
 
 			services.AddScoped<IAuthorizationHandler,
 						  PostOwnerAuthorizationHandler>();
+
+			services.AddScoped<IAuthorizationHandler,
+						  BlogModeratorAuthorizationHandler>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env, UserManager<ApplicationUser> userManager)
 		{
 			if (env.IsDevelopment())
 			{
@@ -120,6 +131,8 @@ namespace BlogHosting
 			app.UseCookiePolicy();
 
 			app.UseAuthentication();
+
+			ApplicationDbInitializer.SeedUsers(userManager);
 
 			app.UseMvc(routes =>
 			{

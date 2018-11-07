@@ -166,7 +166,8 @@ namespace BlogHosting.Migrations
                     BlogName = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     CreatedDateTime = table.Column<DateTime>(nullable: false),
-                    UpdatedDateTime = table.Column<DateTime>(nullable: false)
+                    UpdatedDateTime = table.Column<DateTime>(nullable: false),
+                    ImagePath = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -174,6 +175,30 @@ namespace BlogHosting.Migrations
                     table.ForeignKey(
                         name: "FK_Blog_AspNetUsers_AuthorId",
                         column: x => x.AuthorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BlogModerator",
+                columns: table => new
+                {
+                    BlogId = table.Column<int>(nullable: false),
+                    ModeratorId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlogModerator", x => new { x.BlogId, x.ModeratorId });
+                    table.ForeignKey(
+                        name: "FK_BlogModerator_Blog_BlogId",
+                        column: x => x.BlogId,
+                        principalTable: "Blog",
+                        principalColumn: "BlogId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BlogModerator_AspNetUsers_ModeratorId",
+                        column: x => x.ModeratorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -190,7 +215,8 @@ namespace BlogHosting.Migrations
                     Title = table.Column<string>(nullable: true),
                     Text = table.Column<string>(nullable: true),
                     CreatedDateTime = table.Column<DateTime>(nullable: false),
-                    UpdatedDateTime = table.Column<DateTime>(nullable: false)
+                    UpdatedDateTime = table.Column<DateTime>(nullable: false),
+                    ImagePath = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -200,7 +226,7 @@ namespace BlogHosting.Migrations
                         column: x => x.AuthorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Post_Blog_BlogId",
                         column: x => x.BlogId,
@@ -243,7 +269,7 @@ namespace BlogHosting.Migrations
                         column: x => x.PostId,
                         principalTable: "Post",
                         principalColumn: "PostId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -269,7 +295,7 @@ namespace BlogHosting.Migrations
                         column: x => x.PostId,
                         principalTable: "Post",
                         principalColumn: "PostId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -279,7 +305,7 @@ namespace BlogHosting.Migrations
                     TagId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
-                    PostId = table.Column<int>(nullable: true)
+                    PostId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -289,8 +315,13 @@ namespace BlogHosting.Migrations
                         column: x => x.PostId,
                         principalTable: "Post",
                         principalColumn: "PostId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[] { "bad1b9fd-14f9-4c4a-92e8-b1ce19040d0a", "d935b70c-bcc5-4e05-897e-66191c3ebd65", "Admin", "ADMIN" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -335,6 +366,11 @@ namespace BlogHosting.Migrations
                 name: "IX_Blog_AuthorId",
                 table: "Blog",
                 column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BlogModerator_ModeratorId",
+                table: "BlogModerator",
+                column: "ModeratorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comment_AuthorId",
@@ -393,6 +429,9 @@ namespace BlogHosting.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "BlogModerator");
 
             migrationBuilder.DropTable(
                 name: "Comment");

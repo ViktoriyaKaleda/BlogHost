@@ -1,16 +1,15 @@
-﻿@model BlogH.Models.Post
-
+﻿@model BlogHosting.Models.PostViewModels.PostEditViewModel
 @{
     ViewData["Title"] = "Edit";
 }
-
-<h2>Edit</h2>
-
-<h4>Post</h4>
-<hr />
+<h2>Edit Post</h2>
+<p>
+    <a asp-action="Delete" asp-route-id="@Model.PostId">Delete this Post</a>
+</p>
+<img class="rounded img-responsive center-block" id="targetImg" src="@Url.Content(Model.ImagePath ?? Model.Blog.ImagePath)" alt="">
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="PostId" />
             <div class="form-group">
@@ -24,9 +23,14 @@
                 <span asp-validation-for="Text" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Tags" class="control-label"></label>
-                <select multiple name="tags" data-role="tagsinput" asp-for="Tags" class="form-control"></select>
-                <span asp-validation-for="Tags" class="text-danger"></span>
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" id="imageBrowse" class="custom-file-input" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StringTags" class="control-label"></label>
+                <select multiple name="tags" data-role="tagsinput" asp-for="StringTags" class="form-control"></select>
+                <span asp-validation-for="StringTags" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
@@ -34,11 +38,9 @@
         </form>
     </div>
 </div>
-
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
-
 @section Scripts {
     <script>
         $(document).keypress(function (e) {
@@ -57,6 +59,36 @@
         }
 
         expandTextarea('txtarea');
+
+        $(document).ready(function () {
+
+            $("#imageBrowse").change(function () {
+
+                var File = this.files;
+
+                if (File && File[0]) {
+                    ReadImage(File[0]);
+                }
+            })
+        })
+
+
+        var ReadImage = function (file) {
+
+            var reader = new FileReader;
+            var image = new Image;
+
+            reader.readAsDataURL(file);
+            reader.onload = function (_file) {
+
+                image.src = _file.target.result;
+                image.onload = function () {
+
+                    $("#targetImg").attr('src', _file.target.result);
+                    $("#imagePreview").show();
+                }
+            }
+        }
     </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

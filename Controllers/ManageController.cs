@@ -4,8 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using BlogHosting.Data;
 using BlogHosting.Models;
+using BlogHosting.Models.AccountViewModels;
 using BlogHosting.Models.ManageViewModels;
+using BlogHosting.Models.PageNavigationViewModels;
 using BlogHosting.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +16,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace BlogHosting.Controllers
@@ -27,6 +31,7 @@ namespace BlogHosting.Controllers
 		private readonly ILogger _logger;
 		private readonly UrlEncoder _urlEncoder;
 		private readonly IHostingEnvironment _appEnvironment;
+		private readonly ApplicationDbContext _context;
 
 		private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 		private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -37,7 +42,8 @@ namespace BlogHosting.Controllers
 		  IEmailSender emailSender,
 		  ILogger<ManageController> logger,
 		  UrlEncoder urlEncoder,
-		  IHostingEnvironment appEnvironment)
+		  IHostingEnvironment appEnvironment,
+		  ApplicationDbContext context)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
@@ -45,15 +51,22 @@ namespace BlogHosting.Controllers
 			_logger = logger;
 			_urlEncoder = urlEncoder;
 			_appEnvironment = appEnvironment;
+			_context = context;
 		}
 
 		[TempData]
 		public string StatusMessage { get; set; }
 
 		[HttpGet]
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string username = null)
 		{
-			var user = await _userManager.GetUserAsync(User);
+			ApplicationUser user;
+
+			if (username == null)
+				user = await _userManager.GetUserAsync(User);
+			else
+				user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == username);
+
 			if (user == null)
 			{
 				throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -76,14 +89,20 @@ namespace BlogHosting.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Index(IndexViewModel model)
+		public async Task<IActionResult> Index(IndexViewModel model, string username = null)
 		{
 			if (!ModelState.IsValid)
 			{
 				return View(model);
 			}
 
-			var user = await _userManager.GetUserAsync(User);
+			ApplicationUser user;
+
+			if (username == null)
+				user = await _userManager.GetUserAsync(User);
+			else
+				user = await _context.Users.FirstOrDefaultAsync(m => m.UserName == username);
+
 			if (user == null)
 			{
 				throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -147,7 +166,11 @@ namespace BlogHosting.Controllers
 				await _userManager.UpdateAsync(user);
 			}
 
-			StatusMessage = "Your profile has been updated";
+			StatusMessage = "Profile has been updated";
+
+			if (username != null)
+				return RedirectToAction(nameof(GetAllUsers));
+
 			return RedirectToAction(nameof(Index));
 		}
 
@@ -534,6 +557,125 @@ namespace BlogHosting.Controllers
 			var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 
 			return View(nameof(ShowRecoveryCodes), model);
+		}
+
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> GetAllUsers(int page = 1)
+		{
+			var user = await _userManager.GetUserAsync(HttpContext.User);
+			var roles = await _userManager.GetRolesAsync(user);
+
+			int pageSize = 3;   // number of users on page
+
+			IQueryable<ApplicationUser> source = _context.Users;
+			var count = await source.CountAsync();
+			var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+			PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
+			UsersPageViewModel viewModel = new UsersPageViewModel
+			{
+				PageViewModel = pageViewModel,
+				Users = items
+			};
+
+			return View(viewModel);
+		}
+
+		[HttpGet]
+		[Authorize(Roles = "Admin")]
+		public IActionResult CreateUser()
+		{
+			return View();
+		}
+
+		[HttpPost]
+		[Authorize(Roles = "Admin")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> CreateUser(RegisterViewModel model, string returnUrl = null)
+		{
+			if (ModelState.IsValid)
+			{
+				var user = new ApplicationUser
+				{
+					UserName = model.Username,
+					FirstName = model.FirstName,
+					LastName = model.LastName,
+					Email = model.Email
+				};
+
+				if (model.AvatarFile?.FileName != null)
+				{
+					string path = GetAvatarPath(model.AvatarFile);
+
+					user.AvatarPath = "~/" + path;
+
+					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
+					{
+						await model.AvatarFile.CopyToAsync(fileStream);
+					}
+				}
+
+				var result = await _userManager.CreateAsync(user, model.Password);
+				if (result.Succeeded)
+				{
+					_logger.LogInformation("Admin created a new user account with password.");
+
+					var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+					var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+					await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+					return RedirectToAction(nameof(GetAllUsers));
+				}
+				AddErrors(result);
+			}
+
+			// If we got this far, something failed, redisplay form
+			return View(model);
+		}
+
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Delete(string id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var user = await _userManager.FindByIdAsync(id);
+
+			if (user == null)
+			{
+				return NotFound();
+			}
+
+			return View(user);
+		}
+		
+		[HttpPost, ActionName("Delete")]
+		[Authorize(Roles = "Admin")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteConfirmed(string id)
+		{
+			var user = await _userManager.FindByIdAsync(id);
+			var blogModeratros = await _context.BlogModerator.Where(m => m.ModeratorId == user.Id).ToListAsync();
+
+			if (blogModeratros.Count() != 0)
+			{
+				foreach (var blogModerator in blogModeratros)
+				{
+					_context.BlogModerator.Remove(blogModerator);
+				}
+				await _context.SaveChangesAsync();
+			}
+
+			_context.UserLogins.RemoveRange(_context.UserLogins.Where(ul => ul.UserId == user.Id));
+
+			_context.UserRoles.RemoveRange(_context.UserRoles.Where(ur => ur.UserId == user.Id));
+
+			_context.Users.Remove(_context.Users.Where(usr => usr.Id == user.Id).Single());
+
+			await _context.SaveChangesAsync();
+
+			return RedirectToAction(nameof(GetAllUsers));
 		}
 
 		#region Helpers

@@ -11,6 +11,13 @@
             <small>
                 <i>@Localizer["Posted on"] @Model.CreatedDate.ToShortDateString() @Localizer["at"] @Model.CreatedDate.ToShortTimeString()</i>
             </small>
+            @*@if ((await AuthorizationService.AuthorizeAsync(User, Model.Post.Blog, "OwnerPolicy")).Succeeded
+           || (await AuthorizationService.AuthorizeAsync(User, Model.Post.Blog, "ModeratorPolicy")).Succeeded)
+            {
+                <small>
+                    <a class="text-primary deleteBtn" id="@Model.CommentId">@Localizer["Delete"]</a>
+                </small>
+            }*@
         </h4>
         @Model.Text
     </div>
