@@ -27,7 +27,8 @@
             <img class="rounded img-responsive" src="@Url.Content(Model.ImagePath ?? Model.Blog.ImagePath ?? "~/images/slider-1.jpg")" alt="">
             <hr>
             <!-- Post Content -->
-            <p>@Model.Text</p>
+            @Html.Raw(Model.Text)
+
             <hr>
             <ul class="tags">
                 @foreach (var tag in @Model.Tags)

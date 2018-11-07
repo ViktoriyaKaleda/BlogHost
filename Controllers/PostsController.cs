@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using BlogHosting.Models.PostViewModels;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using CodeKicker.BBCode;
 
 namespace BlogHosting.Controllers
 {
@@ -62,6 +63,8 @@ namespace BlogHosting.Controllers
 			{
 				return NotFound();
 			}
+
+			//post.Text = BBCode.ToHtml(post.Text);
 
 			TempData["postId"] = post.PostId;
 
