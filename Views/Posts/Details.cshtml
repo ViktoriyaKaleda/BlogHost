@@ -62,20 +62,19 @@
                     </form>
                 </div>
             </div>
-            <h3 id="comments">@Localizer["Comments"] (@($"{Model.Comments?.Count ?? 0}"))</h3>
+            <h3 id="comments">@Localizer["Comments"] (<span id="commentsNumber">@($"{Model.Comments?.Count ?? 0}")</span>)</h3>
             @if (Model.Comments?.Count > 0)
             {
                 <br />
-                foreach (var comment in Model.Comments.Where(m => m.ParentCommentId == 0))
-                {
-                    <partial name="~/Views/Posts/CommentPartial.cshtml" model="@comment" />
-                }
+                <div id="commentsContainer">
+                    <partial name="~/Views/Posts/CommentPartial.cshtml" model="@Model.Comments.Where(m => m.ParentCommentId == 0).ToList()" />
+                </div>
             }
             <content>
                 <div id="errorBox">
                     <span style="display: none;" id="errorMessage" name="errorMessage" class="text-danger" />
                 </div>
-                <div id="messageBox">
+                <div id="infoBox">
                     <span style="display: none;" id="infoMessage" name="message" class="text-info" />
                 </div>
                 <div id="successBox">
@@ -102,16 +101,30 @@
         }
     }
 
+    function addDeleteListener() {
+        var deleteButtons = document.getElementsByClassName("deleteBtn");
+        for (let i = 0; i < deleteButtons.length; i++) {
+            deleteButtons[i].addEventListener("click", function (event) {
+                const commentId = this.getAttribute('id');
+                DeleteComment(commentId);
+                event.preventDefault();
+            })
+        };
+    }
+
     function DeleteComment(inputText) {
         $.ajax({
-            url: "/DeleteComment",
+            url: @Model.PostId + "/DeleteComment",
             type: 'POST',
             data: JSON.stringify(inputText),
             contentType: 'application/json; charset=utf-8',
             dataType: 'html',
             success: (result) => {
-                $('#postsContainer').html(result);
-                ShowMessage("Moderator was added.", $('#successMessage'));
+                $('#commentsContainer').html(result);
+                ShowMessage("Comment was deleted.", $('#infoMessage'));
+                console.log($('#commentsNumber'));
+                const commentsNumber = $('#commentsNumber').text();
+                $('#commentsNumber').text(commentsNumber - 1);
                 addDeleteListener();
             },
             error: function (jxqr, error, status) {
@@ -120,19 +133,7 @@
         })
     }
 
-    $(document).ready(() => {
-
-        function addDeleteListener() {
-            var deleteButtons = document.getElementsByClassName("deleteBtn");
-            for (let i = 0; i < deleteButtons.length; i++) {
-                deleteButtons[i].addEventListener("click", function (event) {
-                    const commentId = this.getAttribute('id');
-                    DeleteComment(commentId);
-                    event.preventDefault();
-                })
-            };
-        }
-
+    $(document).ready(() => {      
         addDeleteListener();
     });
 

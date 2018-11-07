@@ -1,34 +1,35 @@
-﻿@model BlogH.Models.Comment
+﻿@model List<BlogH.Models.Comment>
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
-<div class="media mb-4 commnets-area">
-    <div class="media-left">
-        <img class="avatar" style=" width: 50px; height: 50px;" src="@Url.Content(Model.Author.AvatarPath ?? "~/Avatars/default.png")">
-    </div>
-    <div class="media-body">
-        <h4 class="mt-0">
-            @Model.Author.UserName
-            <small>
-                <i>@Localizer["Posted on"] @Model.CreatedDate.ToShortDateString() @Localizer["at"] @Model.CreatedDate.ToShortTimeString()</i>
-            </small>
-            @*@if ((await AuthorizationService.AuthorizeAsync(User, Model.Post.Blog, "OwnerPolicy")).Succeeded
-           || (await AuthorizationService.AuthorizeAsync(User, Model.Post.Blog, "ModeratorPolicy")).Succeeded)
-            {
+@foreach (var comment in Model)
+{
+    <div class="media mb-4 commnets-area">
+        <div class="media-left">
+            <img class="avatar" style=" width: 50px; height: 50px;" src="@Url.Content(comment.Author.AvatarPath ?? "~/Avatars/default.png")">
+        </div>
+        <div class="media-body">
+            <h4 class="mt-0">
+                @comment.Author.UserName
                 <small>
-                    <a class="text-primary deleteBtn" id="@Model.CommentId">@Localizer["Delete"]</a>
+                    <i>@Localizer["Posted on"] @comment.CreatedDate.ToShortDateString() @Localizer["at"] @comment.CreatedDate.ToShortTimeString()</i>
                 </small>
-            }*@
-        </h4>
-        @Model.Text
-    </div>
-    <div class="media-right">
-        <h5 class="reply-btn"><a href="#!" class="replyButton" data-parentId="@Model.CommentId" data-username="@Model.Author.UserName"><b>@Localizer["Reply"]</b></a></h5>
-    </div>
-    @if (Model.ChildComments != null)
-    {
-        foreach (var child in Model.ChildComments)
-        {
-            <partial name="~/Views/Posts/CommentPartial.cshtml" model="@child" />
+                @if ((await AuthorizationService.AuthorizeAsync(User, comment.Post.Blog, "OwnerPolicy")).Succeeded
+            || (await AuthorizationService.AuthorizeAsync(User, comment.Post.Blog, "ModeratorPolicy")).Succeeded)
+                {
+                    <small>
+                        <a href="!#" class="text-primary deleteBtn" id="@comment.CommentId">@Localizer["Delete"]</a>
+                    </small>
+                }
+            </h4>
+            @comment.Text
+        </div>
+        <div class="media-right">
+            <h5 class="reply-btn"><a href="#!" class="replyButton" data-parentId="@comment.CommentId" data-username="@comment.Author.UserName"><b>@Localizer["Reply"]</b></a></h5>
+        </div>
+        @if (comment.ChildComments != null)
+        {           
+            <partial name="~/Views/Posts/CommentPartial.cshtml" model="@comment.ChildComments" />
         }
-    }
-</div>
+    </div>
+
+}

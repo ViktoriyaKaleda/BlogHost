@@ -146,35 +146,33 @@ namespace BlogHosting.Controllers
 			return View(post);
 		}
 
-		//[HttpPost("DeleteComment")]
-		//[ValidateAntiForgeryToken]
-		//[Authorize]
-		//public async Task<IActionResult> DeleteComment(int? commentId)
-		//{
-		//	var comment = await _context.Comment.FirstOrDefaultAsync(m => m.CommentId == commentId);
-		//	var postId = comment.Post.PostId;
+		[HttpPost("[Controller]/Details/{id}/DeleteComment")]
+		[Authorize]
+		public async Task<IActionResult> DeleteComment(int id, [FromBody]int? commentId)
+		{
+			var comment = await _context.Comment.FirstOrDefaultAsync(m => m.CommentId == commentId);
+			var postId = comment.Post.PostId;
 
-		//	if (comment == null)
-		//		return NotFound();
+			if (comment == null)
+				return NotFound();
 
-		//	if (!(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "OwnerPolicy")).Succeeded
-		//		&& !(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "ModeratorPolicy")).Succeeded)
-		//		return Forbid();
+			if (!(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "OwnerPolicy")).Succeeded
+				&& !(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "ModeratorPolicy")).Succeeded)
+				return Forbid();
 
-		//	await DeleteChildComments(comment);
+			await DeleteChildCommentsParant(comment);
 
-		//	_context.Comment.Remove(comment);
-		//	await _context.SaveChangesAsync();
+			_context.Comment.Remove(comment);
+			await _context.SaveChangesAsync();
 
-		//	return RedirectToAction(nameof(Details), postId);
+			return PartialView("~/Views/Posts/CommentPartial.cshtml", 
+				await _context.Comment.Where(m => m.Post.PostId == postId && m.ParentCommentId == 0).ToListAsync());
+		}
 
-		//}
-
-		private async Task DeleteChildComments(Comment comment)
+		private async Task DeleteChildCommentsParant(Comment comment)
 		{
 			foreach (var c in comment.ChildComments)
 			{
-				await DeleteChildComments(c);
 				c.ParentCommentId = 0;
 				_context.Comment.Update(c);
 			}

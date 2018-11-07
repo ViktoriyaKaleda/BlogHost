@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.1.4" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.4" PrivateAssets="All" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.4" />
+    <PackageReference Include="NSwag.AspNetCore" Version="11.20.1" />
   </ItemGroup>
 
   <ItemGroup>

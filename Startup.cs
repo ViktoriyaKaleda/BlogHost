@@ -17,6 +17,10 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using BlogHosting.Configurations;
+using System.Reflection;
+using NSwag;
+using NSwag.AspNetCore;
+using NJsonSchema;
 
 namespace BlogHosting
 {
@@ -106,6 +110,8 @@ namespace BlogHosting
 
 			services.AddScoped<IAuthorizationHandler,
 						  BlogModeratorAuthorizationHandler>();
+
+			services.AddSwagger();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,6 +134,13 @@ namespace BlogHosting
 			app.UseRequestLocalization(locOptions.Value);
 
 			app.UseStaticFiles();
+
+			app.UseSwaggerUi3WithApiExplorer(settings =>
+			{
+				settings.GeneratorSettings.DefaultPropertyNameHandling =
+					PropertyNameHandling.CamelCase;
+			});
+
 			app.UseCookiePolicy();
 
 			app.UseAuthentication();
