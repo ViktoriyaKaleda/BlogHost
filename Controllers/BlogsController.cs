@@ -260,7 +260,14 @@ namespace BlogHosting.Controllers
 			if (style == null)
 				return BadRequest();
 
-			return new ObjectResult(style);
+			return new ObjectResult(
+				new {
+					style.BackgrounsColor,
+					style.TitlesFontColor,
+					style.TitlesFontName,
+					style.SecondColor,
+					style.DefaultImagePath
+				});
 		}
 
 		// GET: Blogs/Edit/5
