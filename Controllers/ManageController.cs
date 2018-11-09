@@ -32,6 +32,7 @@ namespace BlogHosting.Controllers
 		private readonly UrlEncoder _urlEncoder;
 		private readonly IHostingEnvironment _appEnvironment;
 		private readonly ApplicationDbContext _context;
+		private readonly IImageService _imageService;
 
 		private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 		private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -43,7 +44,8 @@ namespace BlogHosting.Controllers
 		  ILogger<ManageController> logger,
 		  UrlEncoder urlEncoder,
 		  IHostingEnvironment appEnvironment,
-		  ApplicationDbContext context)
+		  ApplicationDbContext context,
+		  IImageService imageService)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
@@ -52,6 +54,7 @@ namespace BlogHosting.Controllers
 			_urlEncoder = urlEncoder;
 			_appEnvironment = appEnvironment;
 			_context = context;
+			_imageService = imageService;
 		}
 
 		[TempData]
@@ -142,7 +145,7 @@ namespace BlogHosting.Controllers
 					}
 				}
 
-				string path = GetAvatarPath(model.AvatarFile);
+				string path = _imageService.GetAvatarImagePath(model.AvatarFile);
 
 				user.AvatarPath = "~/" + path;
 
@@ -605,7 +608,7 @@ namespace BlogHosting.Controllers
 
 				if (model.AvatarFile?.FileName != null)
 				{
-					string path = GetAvatarPath(model.AvatarFile);
+					string path = _imageService.GetAvatarImagePath(model.AvatarFile);
 
 					user.AvatarPath = "~/" + path;
 
@@ -725,15 +728,6 @@ namespace BlogHosting.Controllers
 
 			model.SharedKey = FormatKey(unformattedKey);
 			model.AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
-		}
-
-		private string GetAvatarPath(IFormFile avatar)
-		{
-			string fileName = Path.GetFileNameWithoutExtension(avatar.FileName);
-			string extension = Path.GetExtension(avatar.FileName);
-			fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
-
-			return "Avatars/" + fileName;
 		}
 
 		#endregion

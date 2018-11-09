@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
+using BlogHosting.Services;
 
 namespace BlogHosting.Controllers
 {
@@ -27,13 +28,17 @@ namespace BlogHosting.Controllers
 		private readonly IHostingEnvironment _appEnvironment;
 		private readonly IAuthorizationService _authorizationService;
 		private readonly ILogger _logger;
+		private readonly IViewRenderService _viewRenderService;
+		private readonly IImageService _imageService;
 
 		public BlogsController(
 				ApplicationDbContext context,
 				UserManager<ApplicationUser> userManager,
 				IHostingEnvironment appEnvironment,
 				IAuthorizationService authorizationService,
-				ILogger<BlogsController> logger
+				ILogger<BlogsController> logger,
+				IViewRenderService viewRenderService,
+				IImageService imageService
 			)
 		{
 			_context = context;
@@ -41,14 +46,43 @@ namespace BlogHosting.Controllers
 			_appEnvironment = appEnvironment;
 			_authorizationService = authorizationService;
 			_logger = logger;
+			_viewRenderService = viewRenderService;
+			_imageService = imageService;
 		}
 
 		// GET: Blogs
-		public async Task<IActionResult> Index(int page = 1)
+		public async Task<IActionResult> Index(int page = 1, string filterNumber = null)
 		{
 			int pageSize = 3;   // number of blogs on page
 
-			IQueryable<Blog> source = _context.Blog.Include(m => m.Author).OrderByDescending(m => m.CreatedDateTime);
+			var filterVariants = new List<SelectListItem>
+			{
+				new SelectListItem { Text = "Recently created", Value="1" },
+				new SelectListItem { Text = "First created", Value="2" },
+				new SelectListItem { Text="Popularity" , Value="3" },
+				new SelectListItem { Text="Number of posts" , Value="4" }
+			};
+
+			IQueryable<Blog> source;
+			switch (filterNumber)
+			{
+				case "1":   // recently created first
+					source = _context.Blog.OrderByDescending(m => m.CreatedDateTime);
+					break;
+				case "2":   // first created first
+					source = _context.Blog.OrderBy(m => m.CreatedDateTime);
+					break;
+				case "3":   // with more likes first
+					source = _context.Blog.OrderByDescending(m => m.Posts.Sum(p => p.Likes.Count));
+					break;
+				case "4":   // with more posts first
+					source = _context.Blog.OrderByDescending(m => m.Posts.Count);
+					break;
+				default:    // recently created first by default
+					source = _context.Blog.OrderByDescending(m => m.CreatedDateTime);
+					break;
+			}
+
 			var count = await source.CountAsync();
 			var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
@@ -56,14 +90,16 @@ namespace BlogHosting.Controllers
 			BlogsPageViewModel viewModel = new BlogsPageViewModel
 			{
 				PageViewModel = pageViewModel,
-				Blogs = items
+				Blogs = items,
+				FiltersSelectListItems = filterVariants,
+				CurrentFilterNumber = string.IsNullOrEmpty(filterNumber) ? "1" : filterNumber,
 			};
 
 			return View(viewModel);
 		}
 
 		// GET: Blogs/Details/5
-		public async Task<IActionResult> Details(int? id, int page = 1)
+		public async Task<IActionResult> Details(int? id, int page = 1, string searchText = null)
 		{
 			if (id == null)
 			{
@@ -78,7 +114,12 @@ namespace BlogHosting.Controllers
 				return NotFound();
 			}
 
-			var posts = blog.Posts.Select(m => new PostPreviewViewModel()
+			var posts = blog.Posts.Where(
+					m => searchText == null
+					|| m.Title.Contains(searchText)
+					|| m.Text.Contains(searchText)
+					|| m.Tags.Select(t => t.Name).Contains(searchText)
+				).Select(m => new PostPreviewViewModel()
 			{
 				PostId = m.PostId,
 				Title = m.Title,
@@ -105,38 +146,11 @@ namespace BlogHosting.Controllers
 			{
 				PageViewModel = pageViewModel,
 				Blog = blog,
-				Posts = items
+				Posts = items,
+				CurrentSearchText = searchText
 			};
 
 			return View(viewModel);
-		}
-
-		[HttpPost("[Controller]/Details/{id}/Search")]
-		public async Task<IActionResult> Search([FromBody] string text)
-		{
-			var posts = await _context.Post
-				.OrderByDescending(m => m.CreatedDateTime)
-				.Where(
-					m => m.Title.Contains(text)
-					|| m.Text.Contains(text)
-					|| m.Tags.Select(t => t.Name).Contains(text)
-					|| text == null
-				)
-				.Select(m => new PostPreviewViewModel()
-				{
-					PostId = m.PostId,
-					Title = m.Title,
-					Text = m.Text,
-					Author = m.Author,
-					CreatedDateTime = m.CreatedDateTime,
-					UpdatedDateTime = m.UpdatedDateTime,
-					Tags = m.Tags,
-					LikesNumber = _context.Like.Where(like => like.Post == m).Count(),
-					CommentsNumber = _context.Comment.Where(c => c.Post == m).Count()
-				})
-				.ToListAsync();
-
-			return PartialView("~/Views/Posts/PostPartial.cshtml", posts);
 		}
 
 		[HttpPost("[Controller]/Edit/{id}/AddModerator")]
@@ -236,7 +250,7 @@ namespace BlogHosting.Controllers
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
-					string path = GetImagePath(viewModel.ImageFile);
+					string path = _imageService.GetBlogImagePath(viewModel.ImageFile);
 
 					blog.ImagePath = "~/" + path;
 
@@ -261,7 +275,8 @@ namespace BlogHosting.Controllers
 				return BadRequest();
 
 			return new ObjectResult(
-				new {
+				new
+				{
 					style.BackgrounsColor,
 					style.TitlesFontColor,
 					style.TitlesFontName,
@@ -360,7 +375,7 @@ namespace BlogHosting.Controllers
 						}
 					}
 
-					string path = GetImagePath(viewModel.ImageFile);
+					string path = _imageService.GetBlogImagePath(viewModel.ImageFile);
 
 					blog.ImagePath = "~/" + path;
 
@@ -442,15 +457,6 @@ namespace BlogHosting.Controllers
 		private bool BlogExists(int id)
 		{
 			return _context.Blog.Any(e => e.BlogId == id);
-		}
-
-		private string GetImagePath(IFormFile avatar)
-		{
-			string fileName = Path.GetFileNameWithoutExtension(avatar.FileName);
-			string extension = Path.GetExtension(avatar.FileName);
-			fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
-
-			return "BlogImages/" + fileName;
 		}
 	}
 }

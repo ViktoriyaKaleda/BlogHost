@@ -17,11 +17,6 @@
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            @*<div class="form-group">
-            <label asp-for="Text" class="control-label"></label>
-            <textarea asp-for="Text" id="txtarea" class="form-control"></textarea>
-            <span asp-validation-for="Text" class="text-danger"></span>
-        </div>*@
             @Html.TextAreaFor(m => m.Text, new {
                 rows = "20", style = "resize:none;width:400px;", placeholder = Html.DisplayNameFor(m => m.Text),
                 @class = "form-control input-lg textarea-editor"

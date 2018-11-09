@@ -16,6 +16,7 @@ using BlogHosting.Models.PostViewModels;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using CodeKicker.BBCode;
+using BlogHosting.Services;
 
 namespace BlogHosting.Controllers
 {
@@ -26,13 +27,15 @@ namespace BlogHosting.Controllers
 		private IHostingEnvironment _appEnvironment;
 		private readonly IAuthorizationService _authorizationService;
 		private readonly ILogger _logger;
+		private readonly IImageService _imageService;
 
 		public PostsController(
 				ApplicationDbContext context,
 				UserManager<ApplicationUser> userManager,
 				IHostingEnvironment appEnvironment,
 				IAuthorizationService authorizationService,
-				ILogger<PostsController> logger
+				ILogger<PostsController> logger,
+				IImageService imageService
 			)
 		{
 			_context = context;
@@ -40,6 +43,7 @@ namespace BlogHosting.Controllers
 			_appEnvironment = appEnvironment;
 			_authorizationService = authorizationService;
 			_logger = logger;
+			_imageService = imageService;
 		}
 
 		// GET: Posts
@@ -231,7 +235,7 @@ namespace BlogHosting.Controllers
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
-					string path = GetImagePath(viewModel.ImageFile);
+					string path = _imageService.GetPostImagePath(viewModel.ImageFile);
 
 					post.ImagePath = "~/" + path;
 
@@ -316,7 +320,7 @@ namespace BlogHosting.Controllers
 						}
 					}
 
-					string path = GetImagePath(viewModel.ImageFile);
+					string path = _imageService.GetPostImagePath(viewModel.ImageFile);
 
 					post.ImagePath = "~/" + path;
 
@@ -388,15 +392,6 @@ namespace BlogHosting.Controllers
 		private bool PostExists(int id)
 		{
 			return _context.Post.Any(e => e.PostId == id);
-		}
-
-		private string GetImagePath(IFormFile avatar)
-		{
-			string fileName = Path.GetFileNameWithoutExtension(avatar.FileName);
-			string extension = Path.GetExtension(avatar.FileName);
-			fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
-
-			return "PostImages/" + fileName;
 		}
 	}
 }

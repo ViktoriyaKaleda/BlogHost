@@ -5,14 +5,46 @@
 <p>
     <a asp-action="Create">@Localizer["Create new"]</a>
 </p>
+
+<div id="selectContainer" class="form-inline ">
+    <div class="form-group">
+        <label>@Localizer["Sort by: "]</label>
+        <select id="filterSelect" class="form-control" asp-items="@Model.FiltersSelectListItems"></select>
+    </div>
+</div>
 <div class="row">
     <div class="col col-xs-12">
-        <div class="blog-grids">
-            @foreach (var blog in Model.Blogs)
-            {
-                <partial name="~/Views/Blogs/BlogPartial.cshtml" model="@blog" />
-            }
+        <div id="blogsContainer" class="blog-grids">
+            <partial name="~/Views/Blogs/BlogPartial.cshtml" model="@Model.Blogs" />
         </div>
     </div>
 </div>
-<partial name="~/Views/Shared/_PageNavigationPartial.cshtml" model="@Model.PageViewModel" />
+<div id="pageNavigationContainer">
+    <partial name="~/Views/Shared/_PageNavigationPartial.cshtml" model="@Model.PageViewModel" />
+</div>
+
+@section Scripts {
+    <script>
+
+        function addNavigationListener() {
+            var navigationButtons = document.getElementsByClassName("pageNavigationBtn");
+            for (let i = 0; i < navigationButtons.length; i++) {
+                const filterNumberParam = navigationButtons[i].getAttribute('href') + "&filterNumber=" + $('#filterSelect').val();
+                navigationButtons[i].setAttribute('href', filterNumberParam);
+            };
+        }
+
+        $(document).ready(() => {
+            $('#filterSelect').change(function () {
+                const filterNumber = $('#filterSelect').val();
+                const url = "/Blogs?filterNumber=" + filterNumber;
+                window.location.assign(url);
+            });
+
+            $("#selectContainer select").val("@Model.CurrentFilterNumber");
+
+            addNavigationListener();
+
+        });
+    </script>
+}

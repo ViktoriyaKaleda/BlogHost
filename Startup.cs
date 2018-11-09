@@ -111,6 +111,16 @@ namespace BlogHosting
 			services.AddScoped<IAuthorizationHandler,
 						  BlogModeratorAuthorizationHandler>();
 
+			services.AddScoped<IViewRenderService, ViewRenderService>();
+
+			services.AddSingleton<IImageService, ImageService>(service =>
+			{
+				return new ImageService
+					(Configuration.GetValue<string>("ImagesFolders:Blogs"),
+					Configuration.GetValue<string>("ImagesFolders:Posts"),
+					Configuration.GetValue<string>("ImagesFolders:Avatars"));
+			});
+
 			services.AddSwagger();
 		}
 

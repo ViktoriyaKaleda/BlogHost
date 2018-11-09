@@ -80,23 +80,23 @@
     }
 
     function SetStyle(styleId) {
-            $.ajax({
-                url: "Edit/" + @Model.BlogId + "/SetStyle",
-                type: 'POST',
-                data: JSON.stringify(styleId),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'html',
-                success: (result) => {
-                    console.log(result);
-                    console.log(result.backgrounsColor);
-                    const style = JSON.parse(result);
-                    document.body.style.background = style.backgrounsColor;
+        $.ajax({
+            url: "Edit/" + @Model.BlogId + "/SetStyle",
+            type: 'POST',
+            data: JSON.stringify(styleId),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'html',
+            success: (result) => {
+                console.log(result);
+                console.log(result.backgrounsColor);
+                const style = JSON.parse(result);
+                document.body.style.background = style.backgrounsColor;
 
-                    document.body.style.color = style.titlesFontColor;
-                    document.body.style.fontFamily = style.titlesFontName;
-                    $('.navbar')[0].style.color = style.secondColor;
-                    $('#targetImg').attr("src", style.defaultImagePath);
-                },
-            })
+                document.body.style.color = style.titlesFontColor;
+                document.body.style.fontFamily = style.titlesFontName;
+                $('.navbar')[0].style.color = style.secondColor;
+                $('#targetImg').attr("src", style.defaultImagePath);
+            },
+        })
         }
 </script>
