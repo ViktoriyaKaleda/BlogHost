@@ -149,9 +149,6 @@ namespace BlogHosting.Controllers
 			await _userManager.UpdateAsync(user);
 			StatusMessage = "Profile has been updated";
 
-			if (username != null)
-				return RedirectToAction(nameof(GetAllUsers));
-
 			return RedirectToAction(nameof(Index));
 		}
 
@@ -538,118 +535,6 @@ namespace BlogHosting.Controllers
 			var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 
 			return View(nameof(ShowRecoveryCodes), model);
-		}
-
-		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> GetAllUsers(int page = 1)
-		{
-			var user = await _userManager.GetUserAsync(HttpContext.User);
-			var roles = await _userManager.GetRolesAsync(user);
-
-			int pageSize = 3;   // number of users on page
-
-			IQueryable<ApplicationUser> source = _context.Users;
-			var count = await source.CountAsync();
-			var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-
-			PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
-			UsersPageViewModel viewModel = new UsersPageViewModel
-			{
-				PageViewModel = pageViewModel,
-				Users = items
-			};
-
-			return View(viewModel);
-		}
-
-		[HttpGet]
-		[Authorize(Roles = "Admin")]
-		public IActionResult CreateUser()
-		{
-			return View();
-		}
-
-		[HttpPost]
-		[Authorize(Roles = "Admin")]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> CreateUser(RegisterViewModel model, string returnUrl = null)
-		{
-			if (ModelState.IsValid)
-			{
-				var user = new ApplicationUser
-				{
-					UserName = model.Username,
-					FirstName = model.FirstName,
-					LastName = model.LastName,
-					Email = model.Email
-				};
-
-				if (model.AvatarFile?.FileName != null)
-				{
-					user.AvatarPath = await _imageService.SaveAvatarImage(model.AvatarFile);
-				}
-
-				var result = await _userManager.CreateAsync(user, model.Password);
-				if (result.Succeeded)
-				{
-					_logger.LogInformation("Admin created a new user account with password.");
-
-					var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-					var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-					await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
-					return RedirectToAction(nameof(GetAllUsers));
-				}
-				AddErrors(result);
-			}
-
-			// If we got this far, something failed, redisplay form
-			return View(model);
-		}
-
-		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> Delete(string id)
-		{
-			if (id == null)
-			{
-				return NotFound();
-			}
-
-			var user = await _userManager.FindByIdAsync(id);
-
-			if (user == null)
-			{
-				return NotFound();
-			}
-
-			return View(user);
-		}
-		
-		[HttpPost, ActionName("Delete")]
-		[Authorize(Roles = "Admin")]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> DeleteConfirmed(string id)
-		{
-			var user = await _userManager.FindByIdAsync(id);
-			var blogModeratros = await _context.BlogModerator.Where(m => m.ModeratorId == user.Id).ToListAsync();
-
-			if (blogModeratros.Count() != 0)
-			{
-				foreach (var blogModerator in blogModeratros)
-				{
-					_context.BlogModerator.Remove(blogModerator);
-				}
-				await _context.SaveChangesAsync();
-			}
-
-			_context.UserLogins.RemoveRange(_context.UserLogins.Where(ul => ul.UserId == user.Id));
-
-			_context.UserRoles.RemoveRange(_context.UserRoles.Where(ur => ur.UserId == user.Id));
-
-			_context.Users.Remove(_context.Users.Where(usr => usr.Id == user.Id).Single());
-
-			await _context.SaveChangesAsync();
-
-			return RedirectToAction(nameof(GetAllUsers));
 		}
 
 		#region Helpers

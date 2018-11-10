@@ -311,7 +311,8 @@ namespace BlogHosting.Controllers
 					ImagePath = blog.ImagePath,
 					Moderators = blog.BlogModerators,
 					Styles = selectItems,
-					CurrentStyle = await _context.BlogStyle.SingleOrDefaultAsync(m => m.BlogStyleName == "Default")
+					CurrentStyle = blog.BlogStyle,
+					BlogStyleId = blog.BlogStyle.BlogStyleId
 				};
 
 				return View(viewModel);
