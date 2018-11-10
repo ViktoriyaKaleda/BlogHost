@@ -235,14 +235,7 @@ namespace BlogHosting.Controllers
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
-					string path = _imageService.GetPostImagePath(viewModel.ImageFile);
-
-					post.ImagePath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await viewModel.ImageFile.CopyToAsync(fileStream);
-					}
+					post.ImagePath = await _imageService.SavePostImage(viewModel.ImageFile);
 				}
 
 				_context.Add(post);
@@ -308,26 +301,7 @@ namespace BlogHosting.Controllers
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
-					if (post.ImagePath != null)
-					{
-						try
-						{
-							System.IO.File.Delete(_appEnvironment.WebRootPath + "/PostImages/" + Path.GetFileName(post.ImagePath));
-						}
-						catch (System.IO.IOException e)
-						{
-							_logger.LogWarning("Failed to delete post image file. File path: {}", post.ImagePath);
-						}
-					}
-
-					string path = _imageService.GetPostImagePath(viewModel.ImageFile);
-
-					post.ImagePath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await viewModel.ImageFile.CopyToAsync(fileStream);
-					}
+					post.ImagePath = await _imageService.SavePostImage(viewModel.ImageFile, post.ImagePath);
 				}
 
 				List<Tag> postTags = new List<Tag>();
@@ -384,6 +358,7 @@ namespace BlogHosting.Controllers
 		public async Task<IActionResult> DeleteConfirmed(int id)
 		{
 			var post = await _context.Post.FindAsync(id);
+			_imageService.DeletePostImage(post.ImagePath);
 			_context.Post.Remove(post);
 			await _context.SaveChangesAsync();
 			return RedirectToAction(nameof(Index), "Blogs");

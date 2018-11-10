@@ -133,42 +133,20 @@ namespace BlogHosting.Controllers
 
 			if (model.AvatarFile?.FileName != null)
 			{
-				if (user.AvatarPath != null)
-				{
-					try
-					{
-						System.IO.File.Delete(_appEnvironment.WebRootPath + "/Avatars/" + Path.GetFileName(user.AvatarPath));
-					}
-					catch (System.IO.IOException e)
-					{
-						_logger.LogWarning("Failed to delete user avatar file. File path: {}", user.AvatarPath);
-					}
-				}
-
-				string path = _imageService.GetAvatarImagePath(model.AvatarFile);
-
-				user.AvatarPath = "~/" + path;
-
-				using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-				{
-					await model.AvatarFile.CopyToAsync(fileStream);
-				}
-
-				await _userManager.UpdateAsync(user);
+				user.AvatarPath = await _imageService.SaveAvatarImage(model.AvatarFile, user.AvatarPath);				
 			}
 
 			if (model.FirstName != user.FirstName)
 			{
 				user.FirstName = model.FirstName;
-				await _userManager.UpdateAsync(user);
 			}
 
 			if (model.LastName != user.LastName)
 			{
 				user.LastName = model.LastName;
-				await _userManager.UpdateAsync(user);
 			}
 
+			await _userManager.UpdateAsync(user);
 			StatusMessage = "Profile has been updated";
 
 			if (username != null)
@@ -608,14 +586,7 @@ namespace BlogHosting.Controllers
 
 				if (model.AvatarFile?.FileName != null)
 				{
-					string path = _imageService.GetAvatarImagePath(model.AvatarFile);
-
-					user.AvatarPath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await model.AvatarFile.CopyToAsync(fileStream);
-					}
+					user.AvatarPath = await _imageService.SaveAvatarImage(model.AvatarFile);
 				}
 
 				var result = await _userManager.CreateAsync(user, model.Password);

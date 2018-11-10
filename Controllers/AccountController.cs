@@ -239,14 +239,7 @@ namespace BlogHosting.Controllers
 
 				if (model.AvatarFile?.FileName != null)
 				{
-					string path = _imageService.GetAvatarImagePath(model.AvatarFile);
-
-					user.AvatarPath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await model.AvatarFile.CopyToAsync(fileStream);
-					}
+					user.AvatarPath = await _imageService.SaveAvatarImage(model.AvatarFile);
 				}
 
 				var result = await _userManager.CreateAsync(user, model.Password);

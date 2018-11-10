@@ -21,6 +21,7 @@ using System.Reflection;
 using NSwag;
 using NSwag.AspNetCore;
 using NJsonSchema;
+using Microsoft.Extensions.Logging;
 
 namespace BlogHosting
 {
@@ -102,6 +103,9 @@ namespace BlogHosting
 					policy.Requirements.Add(new ModeratorRequirement()));
 			});
 
+			//services.AddSingleton<ILoggerFactory, LoggerFactory>();
+			//services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
 			services.AddScoped<IAuthorizationHandler,
 						  BlogOwnerAuthorizationHandler>();
 
@@ -113,13 +117,7 @@ namespace BlogHosting
 
 			services.AddScoped<IViewRenderService, ViewRenderService>();
 
-			services.AddSingleton<IImageService, ImageService>(service =>
-			{
-				return new ImageService
-					(Configuration.GetValue<string>("ImagesFolders:Blogs"),
-					Configuration.GetValue<string>("ImagesFolders:Posts"),
-					Configuration.GetValue<string>("ImagesFolders:Avatars"));
-			});
+			services.AddSingleton<IImageService, ImageService>();
 
 			services.AddSwagger();
 		}

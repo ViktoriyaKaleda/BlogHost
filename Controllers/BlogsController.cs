@@ -250,14 +250,7 @@ namespace BlogHosting.Controllers
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
-					string path = _imageService.GetBlogImagePath(viewModel.ImageFile);
-
-					blog.ImagePath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await viewModel.ImageFile.CopyToAsync(fileStream);
-					}
+					blog.ImagePath = await _imageService.SaveBlogImage(viewModel.ImageFile);
 				}
 
 				_context.Add(blog);
@@ -363,26 +356,7 @@ namespace BlogHosting.Controllers
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
-					if (blog.ImagePath != null)
-					{
-						try
-						{
-							System.IO.File.Delete(_appEnvironment.WebRootPath + "/BlogImages/" + Path.GetFileName(blog.ImagePath));
-						}
-						catch (System.IO.IOException e)
-						{
-							_logger.LogWarning("Failed to delete blog image file. File path: {}", blog.ImagePath);
-						}
-					}
-
-					string path = _imageService.GetBlogImagePath(viewModel.ImageFile);
-
-					blog.ImagePath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await viewModel.ImageFile.CopyToAsync(fileStream);
-					}
+					blog.ImagePath = await _imageService.SaveBlogImage(viewModel.ImageFile, blog.ImagePath);
 				}
 
 				_context.Update(blog);
@@ -439,14 +413,7 @@ namespace BlogHosting.Controllers
 
 			if (blog.ImagePath != null)
 			{
-				try
-				{
-					System.IO.File.Delete(_appEnvironment.WebRootPath + "/BlogImages/" + Path.GetFileName(blog.ImagePath));
-				}
-				catch (System.IO.IOException e)
-				{
-					_logger.LogWarning("Failed to delete blog image file. File path: {}", blog.ImagePath);
-				}
+				_imageService.DeleteBlogImage(blog.ImagePath);
 			}
 
 			_context.Blog.Remove(blog);
