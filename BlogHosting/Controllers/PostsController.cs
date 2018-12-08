@@ -332,10 +332,10 @@ namespace BlogHosting.Controllers
 		[Authorize]
 		public async Task<IActionResult> Delete(int? id)
 		{
-			if (id == null)
-			{
-				return NotFound();
-			}
+			//if (id == null)
+			//{
+			//	return NotFound();
+			//}
 
 			var post = await _context.Post
 				.FirstOrDefaultAsync(m => m.PostId == id);
