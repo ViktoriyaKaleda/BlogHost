@@ -1,4 +1,4 @@
-﻿namespace BLL.Interface.Entities
+﻿namespace DAL.Interface.DTO
 {
 	public class Tag
 	{
