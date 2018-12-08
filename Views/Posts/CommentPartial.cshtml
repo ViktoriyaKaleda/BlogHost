@@ -13,7 +13,7 @@
                 <small>
                     <i>@Localizer["Posted on"] @comment.CreatedDate.ToShortDateString() @Localizer["at"] @comment.CreatedDate.ToShortTimeString()</i>
                 </small>
-                @if ((await AuthorizationService.AuthorizeAsync(User, comment.Post.Blog, "OwnerPolicy")).Succeeded
+                @if ((await AuthorizationService.AuthorizeAsync(User, comment, "OwnerPolicy")).Succeeded
                 || (await AuthorizationService.AuthorizeAsync(User, comment.Post.Blog, "ModeratorPolicy")).Succeeded)
                 {
                     <small>

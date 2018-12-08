@@ -163,7 +163,7 @@ namespace BlogHosting.Controllers
 			if (comment == null)
 				return NotFound();
 
-			if (!(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "OwnerPolicy")).Succeeded
+			if (!(await _authorizationService.AuthorizeAsync(User, comment, "OwnerPolicy")).Succeeded
 				&& !(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "ModeratorPolicy")).Succeeded)
 				return Forbid();
 

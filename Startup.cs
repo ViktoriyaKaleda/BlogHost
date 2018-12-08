@@ -113,6 +113,9 @@ namespace BlogHosting
 						  PostOwnerAuthorizationHandler>();
 
 			services.AddScoped<IAuthorizationHandler,
+						  CommentOwnerAuthorizationHandler>();
+
+			services.AddScoped<IAuthorizationHandler,
 						  BlogModeratorAuthorizationHandler>();
 
 			services.AddScoped<IViewRenderService, ViewRenderService>();
