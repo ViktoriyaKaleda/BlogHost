@@ -12,5 +12,7 @@ namespace BlogHosting.Models.PageNavigationViewModels
 		public IEnumerable<PostPreviewViewModel> Posts { get; set; }
 
 		public PageViewModel PageViewModel { get; set; }
+
+		public string CurrentSearchText { get; set; }
 	}
 }

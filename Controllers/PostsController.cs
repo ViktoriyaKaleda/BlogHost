@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging;
 using BlogHosting.Models.PostViewModels;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using CodeKicker.BBCode;
+using BlogHosting.Services;
 
 namespace BlogHosting.Controllers
 {
@@ -25,13 +27,15 @@ namespace BlogHosting.Controllers
 		private IHostingEnvironment _appEnvironment;
 		private readonly IAuthorizationService _authorizationService;
 		private readonly ILogger _logger;
+		private readonly IImageService _imageService;
 
 		public PostsController(
 				ApplicationDbContext context,
 				UserManager<ApplicationUser> userManager,
 				IHostingEnvironment appEnvironment,
 				IAuthorizationService authorizationService,
-				ILogger<PostsController> logger
+				ILogger<PostsController> logger,
+				IImageService imageService
 			)
 		{
 			_context = context;
@@ -39,6 +43,7 @@ namespace BlogHosting.Controllers
 			_appEnvironment = appEnvironment;
 			_authorizationService = authorizationService;
 			_logger = logger;
+			_imageService = imageService;
 		}
 
 		// GET: Posts
@@ -62,6 +67,8 @@ namespace BlogHosting.Controllers
 			{
 				return NotFound();
 			}
+
+			//post.Text = BBCode.ToHtml(post.Text);
 
 			TempData["postId"] = post.PostId;
 
@@ -146,35 +153,33 @@ namespace BlogHosting.Controllers
 			return View(post);
 		}
 
-		//[HttpPost("DeleteComment")]
-		//[ValidateAntiForgeryToken]
-		//[Authorize]
-		//public async Task<IActionResult> DeleteComment(int? commentId)
-		//{
-		//	var comment = await _context.Comment.FirstOrDefaultAsync(m => m.CommentId == commentId);
-		//	var postId = comment.Post.PostId;
+		[HttpPost("[Controller]/Details/{id}/DeleteComment")]
+		[Authorize]
+		public async Task<IActionResult> DeleteComment(int id, [FromBody]int? commentId)
+		{
+			var comment = await _context.Comment.FirstOrDefaultAsync(m => m.CommentId == commentId);
+			var postId = comment.Post.PostId;
 
-		//	if (comment == null)
-		//		return NotFound();
+			if (comment == null)
+				return NotFound();
 
-		//	if (!(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "OwnerPolicy")).Succeeded
-		//		&& !(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "ModeratorPolicy")).Succeeded)
-		//		return Forbid();
+			if (!(await _authorizationService.AuthorizeAsync(User, comment, "OwnerPolicy")).Succeeded
+				&& !(await _authorizationService.AuthorizeAsync(User, comment.Post.Blog, "ModeratorPolicy")).Succeeded)
+				return Forbid();
 
-		//	await DeleteChildComments(comment);
+			await DeleteChildCommentsParant(comment);
 
-		//	_context.Comment.Remove(comment);
-		//	await _context.SaveChangesAsync();
+			_context.Comment.Remove(comment);
+			await _context.SaveChangesAsync();
 
-		//	return RedirectToAction(nameof(Details), postId);
+			return PartialView("~/Views/Posts/CommentPartial.cshtml", 
+				await _context.Comment.Where(m => m.Post.PostId == postId && m.ParentCommentId == 0).ToListAsync());
+		}
 
-		//}
-
-		private async Task DeleteChildComments(Comment comment)
+		private async Task DeleteChildCommentsParant(Comment comment)
 		{
 			foreach (var c in comment.ChildComments)
 			{
-				await DeleteChildComments(c);
 				c.ParentCommentId = 0;
 				_context.Comment.Update(c);
 			}
@@ -230,14 +235,7 @@ namespace BlogHosting.Controllers
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
-					string path = GetImagePath(viewModel.ImageFile);
-
-					post.ImagePath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await viewModel.ImageFile.CopyToAsync(fileStream);
-					}
+					post.ImagePath = await _imageService.SavePostImage(viewModel.ImageFile);
 				}
 
 				_context.Add(post);
@@ -303,26 +301,7 @@ namespace BlogHosting.Controllers
 
 				if (viewModel.ImageFile?.FileName != null)
 				{
-					if (post.ImagePath != null)
-					{
-						try
-						{
-							System.IO.File.Delete(_appEnvironment.WebRootPath + "/PostImages/" + Path.GetFileName(post.ImagePath));
-						}
-						catch (System.IO.IOException e)
-						{
-							_logger.LogWarning("Failed to delete post image file. File path: {}", post.ImagePath);
-						}
-					}
-
-					string path = GetImagePath(viewModel.ImageFile);
-
-					post.ImagePath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await viewModel.ImageFile.CopyToAsync(fileStream);
-					}
+					post.ImagePath = await _imageService.SavePostImage(viewModel.ImageFile, post.ImagePath);
 				}
 
 				List<Tag> postTags = new List<Tag>();
@@ -379,6 +358,7 @@ namespace BlogHosting.Controllers
 		public async Task<IActionResult> DeleteConfirmed(int id)
 		{
 			var post = await _context.Post.FindAsync(id);
+			_imageService.DeletePostImage(post.ImagePath);
 			_context.Post.Remove(post);
 			await _context.SaveChangesAsync();
 			return RedirectToAction(nameof(Index), "Blogs");
@@ -387,15 +367,6 @@ namespace BlogHosting.Controllers
 		private bool PostExists(int id)
 		{
 			return _context.Post.Any(e => e.PostId == id);
-		}
-
-		private string GetImagePath(IFormFile avatar)
-		{
-			string fileName = Path.GetFileNameWithoutExtension(avatar.FileName);
-			string extension = Path.GetExtension(avatar.FileName);
-			fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
-
-			return "PostImages/" + fileName;
 		}
 	}
 }

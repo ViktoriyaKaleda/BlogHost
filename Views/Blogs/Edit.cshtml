@@ -190,7 +190,11 @@
             $('#styleSelect').change(function () {
                 const styleId = $('#styleSelect').val();
                 SetStyle(styleId);
-            })
+            })            
+
+            document.body.style.background = "@Model.CurrentStyle.BackgrounsColor";
+            document.body.style.color = "@Model.CurrentStyle.TitlesFontColor";
+            document.body.style.fontFamily = "@Model.CurrentStyle.TitlesFontName";
         });
     </script>
 }

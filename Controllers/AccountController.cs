@@ -28,19 +28,22 @@ namespace BlogHosting.Controllers
 		private readonly IEmailSender _emailSender;
 		private readonly ILogger _logger;
 		private readonly IHostingEnvironment _appEnvironment;
+		private readonly IImageService _imageService;
 
 		public AccountController(
 			UserManager<ApplicationUser> userManager,
 			SignInManager<ApplicationUser> signInManager,
 			IEmailSender emailSender,
 			ILogger<AccountController> logger,
-			IHostingEnvironment appEnvironment)
+			IHostingEnvironment appEnvironment,
+			IImageService imageService)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_emailSender = emailSender;
 			_logger = logger;
 			_appEnvironment = appEnvironment;
+			_imageService = imageService;
 		}
 
 		[TempData]
@@ -236,14 +239,7 @@ namespace BlogHosting.Controllers
 
 				if (model.AvatarFile?.FileName != null)
 				{
-					string path = GetAvatarPath(model.AvatarFile);
-
-					user.AvatarPath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await model.AvatarFile.CopyToAsync(fileStream);
-					}
+					user.AvatarPath = await _imageService.SaveAvatarImage(model.AvatarFile);
 				}
 
 				var result = await _userManager.CreateAsync(user, model.Password);
@@ -482,15 +478,6 @@ namespace BlogHosting.Controllers
 			{
 				return RedirectToAction(nameof(HomeController.Index), "Home");
 			}
-		}
-
-		private string GetAvatarPath(IFormFile avatar)
-		{
-			string fileName = Path.GetFileNameWithoutExtension(avatar.FileName);
-			string extension = Path.GetExtension(avatar.FileName);
-			fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
-
-			return "Avatars/" + fileName;
 		}
 
 		#endregion

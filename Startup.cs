@@ -17,6 +17,11 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using BlogHosting.Configurations;
+using System.Reflection;
+using NSwag;
+using NSwag.AspNetCore;
+using NJsonSchema;
+using Microsoft.Extensions.Logging;
 
 namespace BlogHosting
 {
@@ -98,6 +103,9 @@ namespace BlogHosting
 					policy.Requirements.Add(new ModeratorRequirement()));
 			});
 
+			//services.AddSingleton<ILoggerFactory, LoggerFactory>();
+			//services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
 			services.AddScoped<IAuthorizationHandler,
 						  BlogOwnerAuthorizationHandler>();
 
@@ -105,7 +113,16 @@ namespace BlogHosting
 						  PostOwnerAuthorizationHandler>();
 
 			services.AddScoped<IAuthorizationHandler,
+						  CommentOwnerAuthorizationHandler>();
+
+			services.AddScoped<IAuthorizationHandler,
 						  BlogModeratorAuthorizationHandler>();
+
+			services.AddScoped<IViewRenderService, ViewRenderService>();
+
+			services.AddSingleton<IImageService, ImageService>();
+
+			services.AddSwagger();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,6 +145,13 @@ namespace BlogHosting
 			app.UseRequestLocalization(locOptions.Value);
 
 			app.UseStaticFiles();
+
+			app.UseSwaggerUi3WithApiExplorer(settings =>
+			{
+				settings.GeneratorSettings.DefaultPropertyNameHandling =
+					PropertyNameHandling.CamelCase;
+			});
+
 			app.UseCookiePolicy();
 
 			app.UseAuthentication();
@@ -136,6 +160,9 @@ namespace BlogHosting
 
 			app.UseMvc(routes =>
 			{
+				routes.MapRoute(
+					name: "areas",
+					template: "{area:exists}/{controller=Manage}/{action=Index}");
 				routes.MapRoute(
 					name: "default",
 					template: "{controller=Home}/{action=Index}/{id?}");

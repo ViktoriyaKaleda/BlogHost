@@ -32,6 +32,7 @@ namespace BlogHosting.Controllers
 		private readonly UrlEncoder _urlEncoder;
 		private readonly IHostingEnvironment _appEnvironment;
 		private readonly ApplicationDbContext _context;
+		private readonly IImageService _imageService;
 
 		private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 		private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -43,7 +44,8 @@ namespace BlogHosting.Controllers
 		  ILogger<ManageController> logger,
 		  UrlEncoder urlEncoder,
 		  IHostingEnvironment appEnvironment,
-		  ApplicationDbContext context)
+		  ApplicationDbContext context,
+		  IImageService imageService)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
@@ -52,6 +54,7 @@ namespace BlogHosting.Controllers
 			_urlEncoder = urlEncoder;
 			_appEnvironment = appEnvironment;
 			_context = context;
+			_imageService = imageService;
 		}
 
 		[TempData]
@@ -130,46 +133,21 @@ namespace BlogHosting.Controllers
 
 			if (model.AvatarFile?.FileName != null)
 			{
-				if (user.AvatarPath != null)
-				{
-					try
-					{
-						System.IO.File.Delete(_appEnvironment.WebRootPath + "/Avatars/" + Path.GetFileName(user.AvatarPath));
-					}
-					catch (System.IO.IOException e)
-					{
-						_logger.LogWarning("Failed to delete user avatar file. File path: {}", user.AvatarPath);
-					}
-				}
-
-				string path = GetAvatarPath(model.AvatarFile);
-
-				user.AvatarPath = "~/" + path;
-
-				using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-				{
-					await model.AvatarFile.CopyToAsync(fileStream);
-				}
-
-				await _userManager.UpdateAsync(user);
+				user.AvatarPath = await _imageService.SaveAvatarImage(model.AvatarFile, user.AvatarPath);				
 			}
 
 			if (model.FirstName != user.FirstName)
 			{
 				user.FirstName = model.FirstName;
-				await _userManager.UpdateAsync(user);
 			}
 
 			if (model.LastName != user.LastName)
 			{
 				user.LastName = model.LastName;
-				await _userManager.UpdateAsync(user);
 			}
 
+			await _userManager.UpdateAsync(user);
 			StatusMessage = "Profile has been updated";
-
-			if (username != null)
-				return RedirectToAction(nameof(GetAllUsers));
 
 			return RedirectToAction(nameof(Index));
 		}
@@ -559,125 +537,6 @@ namespace BlogHosting.Controllers
 			return View(nameof(ShowRecoveryCodes), model);
 		}
 
-		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> GetAllUsers(int page = 1)
-		{
-			var user = await _userManager.GetUserAsync(HttpContext.User);
-			var roles = await _userManager.GetRolesAsync(user);
-
-			int pageSize = 3;   // number of users on page
-
-			IQueryable<ApplicationUser> source = _context.Users;
-			var count = await source.CountAsync();
-			var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-
-			PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
-			UsersPageViewModel viewModel = new UsersPageViewModel
-			{
-				PageViewModel = pageViewModel,
-				Users = items
-			};
-
-			return View(viewModel);
-		}
-
-		[HttpGet]
-		[Authorize(Roles = "Admin")]
-		public IActionResult CreateUser()
-		{
-			return View();
-		}
-
-		[HttpPost]
-		[Authorize(Roles = "Admin")]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> CreateUser(RegisterViewModel model, string returnUrl = null)
-		{
-			if (ModelState.IsValid)
-			{
-				var user = new ApplicationUser
-				{
-					UserName = model.Username,
-					FirstName = model.FirstName,
-					LastName = model.LastName,
-					Email = model.Email
-				};
-
-				if (model.AvatarFile?.FileName != null)
-				{
-					string path = GetAvatarPath(model.AvatarFile);
-
-					user.AvatarPath = "~/" + path;
-
-					using (var fileStream = new FileStream(_appEnvironment.WebRootPath + "/" + path, FileMode.Create))
-					{
-						await model.AvatarFile.CopyToAsync(fileStream);
-					}
-				}
-
-				var result = await _userManager.CreateAsync(user, model.Password);
-				if (result.Succeeded)
-				{
-					_logger.LogInformation("Admin created a new user account with password.");
-
-					var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-					var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-					await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
-					return RedirectToAction(nameof(GetAllUsers));
-				}
-				AddErrors(result);
-			}
-
-			// If we got this far, something failed, redisplay form
-			return View(model);
-		}
-
-		[Authorize(Roles = "Admin")]
-		public async Task<IActionResult> Delete(string id)
-		{
-			if (id == null)
-			{
-				return NotFound();
-			}
-
-			var user = await _userManager.FindByIdAsync(id);
-
-			if (user == null)
-			{
-				return NotFound();
-			}
-
-			return View(user);
-		}
-		
-		[HttpPost, ActionName("Delete")]
-		[Authorize(Roles = "Admin")]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> DeleteConfirmed(string id)
-		{
-			var user = await _userManager.FindByIdAsync(id);
-			var blogModeratros = await _context.BlogModerator.Where(m => m.ModeratorId == user.Id).ToListAsync();
-
-			if (blogModeratros.Count() != 0)
-			{
-				foreach (var blogModerator in blogModeratros)
-				{
-					_context.BlogModerator.Remove(blogModerator);
-				}
-				await _context.SaveChangesAsync();
-			}
-
-			_context.UserLogins.RemoveRange(_context.UserLogins.Where(ul => ul.UserId == user.Id));
-
-			_context.UserRoles.RemoveRange(_context.UserRoles.Where(ur => ur.UserId == user.Id));
-
-			_context.Users.Remove(_context.Users.Where(usr => usr.Id == user.Id).Single());
-
-			await _context.SaveChangesAsync();
-
-			return RedirectToAction(nameof(GetAllUsers));
-		}
-
 		#region Helpers
 
 		private void AddErrors(IdentityResult result)
@@ -725,15 +584,6 @@ namespace BlogHosting.Controllers
 
 			model.SharedKey = FormatKey(unformattedKey);
 			model.AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
-		}
-
-		private string GetAvatarPath(IFormFile avatar)
-		{
-			string fileName = Path.GetFileNameWithoutExtension(avatar.FileName);
-			string extension = Path.GetExtension(avatar.FileName);
-			fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
-
-			return "Avatars/" + fileName;
 		}
 
 		#endregion

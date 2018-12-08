@@ -5,18 +5,28 @@
     ViewData["Title"] = "Details";
 }
 <div>
-
-    <img class="rounded img-responsive" src="@Url.Content(Model.Blog.ImagePath ?? Model.Blog.BlogStyle.DefaultImagePath)" alt="">
-
-    @if ((await AuthorizationService.AuthorizeAsync(User, Model.Blog, "OwnerPolicy")).Succeeded)
+    <div class="text-center">
+        <img class="rounded img-responsive" src="@Url.Content(Model.Blog.ImagePath ?? Model.Blog.BlogStyle.DefaultImagePath)" alt="">
+    </div>
+    @if ((await AuthorizationService.AuthorizeAsync(User, Model.Blog, "OwnerPolicy")).Succeeded
+    || (await AuthorizationService.AuthorizeAsync(User, Model.Blog, "ModeratorPolicy")).Succeeded)
     {
         <h2>
             @Model.Blog.BlogName
             <a asp-action="Edit" asp-route-id="@Model.Blog.BlogId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
         </h2>
-        <p>
-            <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.Blog.BlogId">@Localizer["Create New Post"]</a>
-        </p>
+        @if ((await AuthorizationService.AuthorizeAsync(User, Model.Blog, "OwnerPolicy")).Succeeded)
+        {
+            <p>
+                <a asp-action="Create" asp-controller="Posts" asp-route-blogId="@Model.Blog.BlogId">@Localizer["Create New Post"]</a>
+            </p>
+        }
+        @if ((await AuthorizationService.AuthorizeAsync(User, Model.Blog, "ModeratorPolicy")).Succeeded)
+        {
+            <p>
+                @Localizer["You are the moderator of this blog"]
+            </p>
+        }
     }
     else
     {
@@ -25,18 +35,17 @@
         </h2>
     }
 </div>
-
-@if (Model.Posts.Count() == 0)
+@if (Model.Posts.Count() == 0 && Model.CurrentSearchText == null)
 {
     <h3>@Localizer["This blog is empty."]</h3>
 }
 else
 {
     <div class="src-area">
-        <form>
+        <div>
             <button class="src-btn" type="submit"><i class="fas fa-search"></i></button>
             <input id="searchInput" class="src-input" type="text" placeholder="@Localizer["Search for..."]">
-        </form>
+        </div>
     </div>
 }
 <div class="container">
@@ -49,74 +58,45 @@ else
     </div>
 </div>
 
-<div class="container text-center">
-    @if (Model.PageViewModel.PageNumber > 3)
-    {
-        <a asp-action="Details" asp-route-id="@Model.Blog.BlogId" asp-route-page="1" class="btn btn-default btn">
-            <i class="glyphicon glyphicon-chevron-left"></i>
-            @Localizer["To start"]
-        </a>
-    }
-
-    @{
-        int i;
-        for (i = Model.PageViewModel.PageNumber - 2 < 2 ? 1 : Model.PageViewModel.PageNumber - 2; 
-            i <= Model.PageViewModel.TotalPages && i <= Model.PageViewModel.PageNumber + 3; i++)
-        {
-            @if (i == Model.PageViewModel.PageNumber + 3)
-            {
-                if (i != Model.PageViewModel.TotalPages)
-                {
-                    <text>...</text>
-                }
-                <a asp-action="Details" asp-route-id="@Model.Blog.BlogId" asp-route-page="@Model.PageViewModel.TotalPages" class="btn btn-default btn">@Model.PageViewModel.TotalPages</a>
-                break;
-            }
-            @if (i == Model.PageViewModel.PageNumber)
-            {
-                <a asp-action="Details" asp-route-id="@Model.Blog.BlogId" asp-route-page="@(i)" class="btn btn-info btn">@i</a>
-            }
-            else
-            {
-                <a asp-action="Details" asp-route-id="@Model.Blog.BlogId" asp-route-page="@(i)" class="btn btn-default btn">@i</a>
-            }
-        }
-        if (Model.PageViewModel.PageNumber < Model.PageViewModel.TotalPages)
-        {
-            <a asp-action="Details" asp-route-id="@Model.Blog.BlogId" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-default btn">
-                @Localizer["Next"]
-                <i class="glyphicon glyphicon-chevron-right"></i>
-            </a>
-        }
-    }
+<div id="pageNavigationContainer">
+    <partial name="~/Views/Shared/_PageNavigationPartial.cshtml" model="@Model.PageViewModel" />
 </div>
 
 @section Scripts {
     <script>
-        function Search(inputText) {
-            $.ajax({
-                url: @Model.Blog.BlogId + "/Search",
-                type: 'POST',
-                data: JSON.stringify(inputText),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'html',
-                success: (result) => {
-                    $("#postsContainer").html(result);
-                }
-            })
-        }
-
         $(document).ready(() => {
-            $("#searchInput").keyup(() => {
-                const t = $('#searchInput').val();
-                Search(t);
-               
-            });
+            $("#searchInput").keyup((e) => {
+                if (e.key === "Enter") {
+                    const t = $('#searchInput').val();
+                    const url = "/Blogs/Details/" + @Model.Blog.BlogId + "?searchText=" + t;
+                    window.location.assign(url);
+                }
+                
+            });            
+
+            const searchText = "@Model.CurrentSearchText";
+            if (searchText != "") {
+                $('#searchInput').val(searchText);
+                $('#searchInput').focus();
+            }
+            addNavigationListener();
             
         });
 
-         document.body.style.background = "@Model.Blog.BlogStyle.BackgrounsColor";
-                document.body.style.color = "@Model.Blog.BlogStyle.TitlesFontColor";
-                document.body.style.fontFamily = "@Model.Blog.BlogStyle.TitlesFontName";
+        function addNavigationListener() {
+            var navigationButtons = document.getElementsByClassName("pageNavigationBtn");
+            for (let i = 0; i < navigationButtons.length; i++) {
+                var searchInputParam = "/Blogs/Details/" + @Model.Blog.BlogId
+                    + "?page=" + navigationButtons[i].getAttribute('data-pageNumber');
+                if ($('#searchInput').val() != "") {
+                    searchInputParam += "&searchText=" + $('#searchInput').val();
+                }
+                navigationButtons[i].setAttribute('href', searchInputParam);
+            };
+        }
+
+        document.body.style.background = "@Model.Blog.BlogStyle.BackgrounsColor";
+        document.body.style.color = "@Model.Blog.BlogStyle.TitlesFontColor";
+        document.body.style.fontFamily = "@Model.Blog.BlogStyle.TitlesFontName";
     </script>
 }

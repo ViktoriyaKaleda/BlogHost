@@ -8,7 +8,7 @@
 </p>
 <img class="rounded img-responsive center-block" id="targetImg" src="@Url.Content(Model.ImagePath ?? Model.Blog.ImagePath)" alt="">
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-8">
         <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="PostId" />
@@ -17,11 +17,10 @@
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Text" class="control-label"></label>
-                <textarea asp-for="Text" id="txtarea" class="form-control"></textarea>
-                <span asp-validation-for="Text" class="text-danger"></span>
-            </div>
+            @Html.TextAreaFor(m => m.Text, new {
+                rows = "20", style = "resize:none;width:400px;", placeholder = Html.DisplayNameFor(m => m.Text),
+                @class = "form-control input-lg textarea-editor"
+            })
             <div class="form-group">
                 <label asp-for="ImageFile" class="control-label"></label>
                 <input asp-for="ImageFile" id="imageBrowse" class="custom-file-input" />
@@ -43,24 +42,14 @@
 </div>
 @section Scripts {
     <script>
-        $(document).keypress(function (e) {
-            if (e.key === "Enter" && e.target.nodeName != "TEXTAREA") {
-                //e.preventDefault();
-                return false;
-            }
-        });
-
-        function expandTextarea(id) {
-            document.getElementById(id).addEventListener('keyup', function () {
-                this.style.overflow = 'hidden';
-                this.style.height = 0;
-                this.style.height = this.scrollHeight + 'px';
-            }, false);
-        }
-
-        expandTextarea('txtarea');
-
         $(document).ready(function () {
+            $('.textarea-editor').summernote({
+                height: 300, // set editor height  
+                minHeight: null, // set minimum height of editor  
+                maxHeight: null, // set maximum height of editor  
+                focus: true // set focus to editable area after initializing summernote  
+            });
+            $('div.note-group-select-from-files').remove();
 
             $("#imageBrowse").change(function () {
 

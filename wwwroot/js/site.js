@@ -28,6 +28,9 @@ for (let i = 0; i < likeButtons.length; i++) {
     });
 }
 
+
+//for comments replying
+
 var replyConnection = new signalR.HubConnectionBuilder().withUrl("/showReply").build();
 
 replyConnection.on("showReply", function (commentId, username) {

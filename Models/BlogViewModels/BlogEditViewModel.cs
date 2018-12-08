@@ -9,6 +9,7 @@ namespace BlogHosting.Models.BlogViewModels
 	{
 		public int BlogId { get; set; }
 
+		[Display(Name = "Name")]
 		public string BlogName { get; set; }
 
 		public string Description { get; set; }
@@ -17,6 +18,7 @@ namespace BlogHosting.Models.BlogViewModels
 
 		public string ImagePath { get; set; }
 
+		[Display(Name = "Style")]
 		public int BlogStyleId { get; set; }
 
 		public List<SelectListItem> Styles { get; set; }
@@ -24,6 +26,7 @@ namespace BlogHosting.Models.BlogViewModels
 		public BlogStyle CurrentStyle { get; set; }
 
 		[DataType(DataType.Upload)]
+		[Display(Name = "Header image")]
 		public IFormFile ImageFile { get; set; }
 	}
 }
