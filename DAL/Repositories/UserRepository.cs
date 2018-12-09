@@ -2,6 +2,7 @@
 using DAL.Interface.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -44,6 +45,11 @@ namespace DAL.Repositories
 			_context.Users.Remove(_context.Users.Where(usr => usr.Id == user.Id).Single());
 
 			await _context.SaveChangesAsync();
+		}
+
+		public List<ApplicationUser> GetAllUsers()
+		{
+			return _userManager.Users.ToList();
 		}
 
 		public async Task<ApplicationUser> GetUserById(string id)
