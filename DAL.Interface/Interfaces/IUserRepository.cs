@@ -15,6 +15,6 @@ namespace DAL.Interface.Interfaces
 
 		Task UpdateUser(ApplicationUser user);
 
-		Task DeleteUser(string id);
+		Task DeleteUser(ApplicationUser user);
 	}
 }

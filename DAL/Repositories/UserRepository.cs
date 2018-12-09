@@ -24,9 +24,8 @@ namespace DAL.Repositories
 			return await _userManager.CreateAsync(user, password);
 		}
 
-		public async Task DeleteUser(string id)
+		public async Task DeleteUser(ApplicationUser user)
 		{
-			var user = await _userManager.FindByIdAsync(id);
 			var blogModeratros = await _context.BlogModerator.Where(m => m.ModeratorId == user.Id).ToListAsync();
 
 			if (blogModeratros.Count() != 0)
