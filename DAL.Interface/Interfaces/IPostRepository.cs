@@ -11,13 +11,13 @@ namespace DAL.Interface.Interfaces
 
 		void AddPost(Post post);
 
-		void DeletePost(int id);
+		void DeletePost(Post post);
 
 		void AddPostTag(Post post, Tag tag);
 
 		void AddPostLike(Post post, Like like);
 
-		void AddPostComment(Post post, Comment comment, Comment parentComment);
+		Task AddPostComment(Post post, Comment comment, int parentCommentId);
 		
 		Task Save();
 	}
