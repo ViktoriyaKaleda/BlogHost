@@ -1,4 +1,5 @@
 ﻿using DAL.Interface.DTO;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
 namespace DAL.Interface.Interfaces
@@ -9,12 +10,10 @@ namespace DAL.Interface.Interfaces
 
 		Task<ApplicationUser> GetUserByUsername(string username);
 
-		void AddUser(ApplicationUser user);
+		Task<IdentityResult> AddUser(ApplicationUser user, string password);
 
-		void UpdateUser(ApplicationUser user);
+		Task UpdateUser(ApplicationUser user);
 
-		void DeleteUser(ApplicationUser user);
-
-		Task Save();
+		Task DeleteUser(string id);
 	}
 }
