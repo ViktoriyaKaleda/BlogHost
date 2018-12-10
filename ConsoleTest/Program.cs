@@ -1,5 +1,7 @@
-﻿using DAL;
-using DAL.Interface.DTO;
+﻿using BLL.Interface.Entities;
+using BLL.Interface.Interfaces;
+using BLL.Services;
+using DAL;
 using DAL.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -21,13 +23,17 @@ namespace ConsoleTest
 					.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=aspnet-BlogHosting-123BCBEF-17A2-4F0F-8B69-F13F4F2ADE44;Trusted_Connection=True;MultipleActiveResultSets=true"));
 
 			// Register UserManager & RoleManager
-			services.AddIdentity<ApplicationUser, IdentityRole>()
+			services.AddIdentity<DAL.Interface.DTO.ApplicationUser, IdentityRole>()
 				.AddEntityFrameworkStores<BlogHostingDbContext>()
 				.AddDefaultTokenProviders();
 
 			// UserManager & RoleManager require logging and HttpContext dependencies
 			services.AddLogging();
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+			services.AddScoped<IAccountService, AccountService>();
+
+			services.AddScoped<SignInManager<DAL.Interface.DTO.ApplicationUser>, SignInManager<DAL.Interface.DTO.ApplicationUser>>();
 		}
 
 		static void Main(string[] args)
@@ -41,21 +47,21 @@ namespace ConsoleTest
 				.UseLazyLoadingProxies()
 				.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=aspnet-BlogHosting-123BCBEF-17A2-4F0F-8B69-F13F4F2ADE44;Trusted_Connection=True;MultipleActiveResultSets=true");
 
-			var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
+			//var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+			var signInManager = serviceProvider.GetRequiredService<SignInManager<DAL.Interface.DTO.ApplicationUser>>();
 
 			using (var context = new BlogHostingDbContext(optionsBuilder.Options))
 			{
-				var rep = new UserRepository(serviceProvider.GetRequiredService<UserManager<ApplicationUser>>(), context);
+				var rep = new UserRepository(serviceProvider.GetRequiredService<UserManager<DAL.Interface.DTO.ApplicationUser>>()
+					, context, signInManager);
 
-				var users =  rep.GetAllUsers();
+				var service = new AccountService(rep);
 
-				foreach (var user in users)
-				{
-					Console.WriteLine(user.UserName);
-				}
+				var user =  service.GetUserByUsernamee("User1");
+
+				Console.WriteLine(user.FirstName);
 			}
 				
-		}		
+		}		 
 	}
 }

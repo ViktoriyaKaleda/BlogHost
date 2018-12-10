@@ -16,5 +16,14 @@ namespace DAL.Interface.Interfaces
 		Task UpdateUser(ApplicationUser user);
 
 		Task DeleteUser(ApplicationUser user);
+
+		Task<SignInResult> Login(string username, string passwors, bool rememberMe);
+
+		Task Login(ApplicationUser user);
+
+		Task Logout();
+
+		//delete later
+		ApplicationUser GetUserByUsernamee(string username);
 	}
 }

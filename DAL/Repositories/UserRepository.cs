@@ -11,12 +11,15 @@ namespace DAL.Repositories
 	public class UserRepository : IUserRepository
 	{
 		private readonly UserManager<ApplicationUser> _userManager;
+		private readonly SignInManager<ApplicationUser> _signInManager;
 		private readonly BlogHostingDbContext _context;
 
-		public UserRepository(UserManager<ApplicationUser> userManager, BlogHostingDbContext context)
+		public UserRepository(UserManager<ApplicationUser> userManager,
+			BlogHostingDbContext context, SignInManager<ApplicationUser> signInManager)
 		{
 			_userManager = userManager;
 			_context = context;
+			_signInManager = signInManager;
 		}
 
 		public async Task<IdentityResult> AddUser(ApplicationUser user, string password)
@@ -61,9 +64,29 @@ namespace DAL.Repositories
 			return await _userManager.FindByNameAsync(username);
 		}
 
+		public ApplicationUser GetUserByUsernamee(string username)
+		{
+			return _context.Users.FirstOrDefault(m => m.UserName == username);
+		}
+
 		public async Task UpdateUser(ApplicationUser user)
 		{
 			await _userManager.UpdateAsync(user);
+		}
+
+		public async Task<SignInResult> Login(string username, string password, bool rememberMe)
+		{
+			return await _signInManager.PasswordSignInAsync(username, password, rememberMe, lockoutOnFailure: false);
+		}
+
+		public async Task Login(ApplicationUser user)
+		{
+			await _signInManager.SignInAsync(user, isPersistent: false);
+		}
+
+		public async Task Logout()
+		{
+			await _signInManager.SignOutAsync();
 		}
 	}
 }

@@ -10,10 +10,10 @@ namespace BLL.Interface.Interfaces
 
 		Task Login(ApplicationUser user);
 
-		Task<IdentityResult> Register(ApplicationUser user, string password);
-
 		Task Logout();
 
-		ApplicationUser GetUserByUsername(string username);
+		Task<ApplicationUser> GetUserByUsername(string username);
+
+		ApplicationUser GetUserByUsernamee(string username);
 	}
 }
