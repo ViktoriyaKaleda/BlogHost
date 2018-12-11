@@ -1,4 +1,5 @@
 ﻿using DAL.Interface.DTO;
+using DAL.Extensions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +22,7 @@ namespace DAL
 		{
 			base.OnModelCreating(builder);
 
-			builder.ApplyConfigurationsFromAssembly(typeof(BlogHostingDbContext).Assembly);
+			builder.ApplyAllConfigurations();
 		}
 	}
 }

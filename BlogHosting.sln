@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTest", "ConsoleTest\ConsoleTest.csproj", "{16691A6C-E658-4D3B-8BAF-8DB1D819862C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{0958A2EF-58EC-4769-B7CD-43F099147EBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BLL", "BLL\BLL.csproj", "{0958A2EF-58EC-4769-B7CD-43F099147EBD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogHost", "BlogHost\BlogHost.csproj", "{D2773145-608F-4610-852B-4CF678BA6554}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{0958A2EF-58EC-4769-B7CD-43F099147EBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0958A2EF-58EC-4769-B7CD-43F099147EBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0958A2EF-58EC-4769-B7CD-43F099147EBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2773145-608F-4610-852B-4CF678BA6554}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2773145-608F-4610-852B-4CF678BA6554}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2773145-608F-4610-852B-4CF678BA6554}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2773145-608F-4610-852B-4CF678BA6554}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
