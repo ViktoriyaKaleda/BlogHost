@@ -1,4 +1,7 @@
 ﻿using System.Globalization;
+using BLL.Interface.Interfaces;
+using BLL.Services;
+using BlogHost.Services;
 using DAL.Interface.DTO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -80,6 +83,10 @@ namespace BlogHost
 			{
 				o.EnableDetailedErrors = true;
 			});
+
+			services.AddScoped<IAccountService, AccountService>();
+
+			services.AddSingleton<IImageService, ImageService>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
