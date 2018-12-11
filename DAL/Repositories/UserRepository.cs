@@ -88,5 +88,20 @@ namespace DAL.Repositories
 		{
 			await _signInManager.SignOutAsync();
 		}
+
+		public async Task<IdentityResult> ChangePassword(ApplicationUser user, string oldPassword, string newPassword)
+		{
+			return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+		}
+
+		public async Task<IdentityResult> UpdateEmailAsync(ApplicationUser user, string newEmail)
+		{
+			return await _userManager.SetEmailAsync(user, newEmail);
+		}
+
+		public async Task<IdentityResult> UpdatePhoneNumberAsync(ApplicationUser user, string newPhoneNumber)
+		{
+			return await _userManager.SetPhoneNumberAsync(user, newPhoneNumber);
+		}
 	}
 }

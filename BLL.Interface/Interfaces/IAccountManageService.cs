@@ -1,6 +1,5 @@
 ﻿using BLL.Interface.Entities;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
 namespace BLL.Interface.Interfaces
@@ -10,8 +9,6 @@ namespace BLL.Interface.Interfaces
 		Task<IdentityResult> UpdateEmailAsync(ApplicationUser user, string email);
 
 		Task<IdentityResult> UpdatePhoneNumberAsync(ApplicationUser user, string phoneNumber);
-
-		Task<IdentityResult> UpdateAvatarAsync(ApplicationUser user, IFormFile avatar);
 
 		Task UpdateFirstNameAsync(ApplicationUser user, string firstName);
 

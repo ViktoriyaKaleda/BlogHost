@@ -15,6 +15,12 @@ namespace DAL.Interface.Interfaces
 
 		Task UpdateUser(ApplicationUser user);
 
+		Task<IdentityResult> UpdateEmailAsync(ApplicationUser user, string newEmail);
+
+		Task<IdentityResult> UpdatePhoneNumberAsync(ApplicationUser user, string newPhoneNumber);
+
+		Task<IdentityResult> ChangePassword(ApplicationUser user,string oldPassword, string newPassword);
+
 		Task DeleteUser(ApplicationUser user);
 
 		Task<SignInResult> Login(string username, string passwors, bool rememberMe);
