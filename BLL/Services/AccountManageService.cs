@@ -16,8 +16,7 @@ namespace BLL.Services
 
 		public AccountManageService(IUserRepository repository)
 		{
-			_repository = repository;
-			Mapper.Initialize(c => c.AddProfile<MappingProfile>());
+			_repository = repository;			
 		}
 
 		public async Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string oldPassword, string newPassword)

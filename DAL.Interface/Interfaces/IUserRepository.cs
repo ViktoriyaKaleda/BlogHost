@@ -1,6 +1,7 @@
 ﻿using DAL.Interface.DTO;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace DAL.Interface.Interfaces
@@ -28,6 +29,10 @@ namespace DAL.Interface.Interfaces
 		Task Login(ApplicationUser user);
 
 		Task Logout();
+
+		string GetUsername(ClaimsPrincipal principal);
+
+		bool IsSignedIn(ClaimsPrincipal principal);
 
 		//delete later
 		ApplicationUser GetUserByUsernamee(string username);

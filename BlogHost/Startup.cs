@@ -1,8 +1,12 @@
 ﻿using System.Globalization;
+using AutoMapper;
 using BLL.Interface.Interfaces;
+using BLL.Mappers;
 using BLL.Services;
 using BlogHost.Services;
 using DAL.Interface.DTO;
+using DAL.Interface.Interfaces;
+using DAL.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -83,6 +87,10 @@ namespace BlogHost
 			{
 				o.EnableDetailedErrors = true;
 			});
+
+			MapperInitializer.MapperConfiguration();
+
+			services.AddScoped<IUserRepository, UserRepository>();
 
 			services.AddScoped<IAccountService, AccountService>();
 

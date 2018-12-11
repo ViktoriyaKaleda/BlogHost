@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace DAL.Repositories
@@ -102,6 +103,16 @@ namespace DAL.Repositories
 		public async Task<IdentityResult> UpdatePhoneNumberAsync(ApplicationUser user, string newPhoneNumber)
 		{
 			return await _userManager.SetPhoneNumberAsync(user, newPhoneNumber);
+		}
+
+		public string GetUsername(ClaimsPrincipal principal)
+		{
+			return _userManager.GetUserName(principal);
+		}
+
+		public bool IsSignedIn(ClaimsPrincipal principal)
+		{
+			return _signInManager.IsSignedIn(principal);
 		}
 	}
 }

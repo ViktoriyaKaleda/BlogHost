@@ -4,6 +4,7 @@ using BLL.Interface.Interfaces;
 using BLL.Mappers;
 using DAL.Interface.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BLL.Services
@@ -15,7 +16,11 @@ namespace BLL.Services
 		public AccountService( IUserRepository repository)
 		{
 			_repository = repository;
-			Mapper.Initialize(c => c.AddProfile<MappingProfile>());
+		}
+
+		public async Task<IdentityResult> CreateUser(ApplicationUser user, string password)
+		{
+			return await _repository.AddUser(Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user), password);
 		}
 
 		public async Task<ApplicationUser> GetUserByUsername(string username)
@@ -26,6 +31,16 @@ namespace BLL.Services
 		public ApplicationUser GetUserByUsernamee(string username)
 		{
 			return Mapper.Map<ApplicationUser>(_repository.GetUserByUsernamee(username));
+		}
+
+		public string GetUsername(ClaimsPrincipal principal)
+		{
+			return _repository.GetUsername(principal);
+		}
+
+		public bool IsSignedIn(ClaimsPrincipal principal)
+		{
+			return _repository.IsSignedIn(principal);
 		}
 
 		public async Task<SignInResult> Login(string username, string password, bool rememberMe)
