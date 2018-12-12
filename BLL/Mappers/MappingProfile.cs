@@ -15,10 +15,13 @@ namespace BLL.Mappers
 				.ForMember(m => m.Posts, opt => opt.MapFrom(src => src.Posts));
 
 			CreateMap<Interface.Entities.Blog, DAL.Interface.DTO.Blog>()
+				.ForMember(m => m.Author, opt => opt.MapFrom(src => src.Author))
 				.ForMember(m => m.BlogStyle, opt => opt.MapFrom(src => src.BlogStyle))
 				.ForMember(m => m.Posts, opt => opt.MapFrom(src => src.Posts));
 
 			CreateMap<Interface.Entities.Post, DAL.Interface.DTO.Post>()
+				.ForMember(m => m.Author, opt => opt.MapFrom(src => src.Author))
+				.ForMember(m => m.Blog, opt => opt.MapFrom(src => src.Blog))
 				.ForMember(m => m.Tags, opt => opt.MapFrom(src => src.Tags))
 				.ForMember(m => m.Likes, opt => opt.MapFrom(src => src.Likes))
 				.ForMember(m => m.Comments, opt => opt.MapFrom(src => src.Comments));

@@ -18,11 +18,11 @@ namespace BlogHost.Controllers
 		private readonly ILogger _logger;
 
 		public AccountController(
-			IAuthenticateService accountService,
+			IAuthenticateService authenticateService,
 			IImageService imageService,
 			ILogger<AccountController> logger)
 		{
-			_service = accountService;
+			_service = authenticateService;
 			_imageService = imageService;
 			_logger = logger;
 		}

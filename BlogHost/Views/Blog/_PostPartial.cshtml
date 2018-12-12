@@ -1,0 +1,43 @@
+﻿@model IEnumerable<BLL.Interface.Entities.Post>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@foreach (var post in Model)
+{
+    <div class="grid">
+        <div class="entry-media">
+            <img src="@Url.Content(post.ImagePath ?? post.Blog.ImagePath ?? "~/images/slider-1.jpg")" alt="">
+        </div>
+        <div class="entry-body">
+            <span class="cat">@post.Author.UserName</span>
+            <h3><a asp-action="Details" asp-controller="Posts" asp-route-id="@post.PostId">@post.Title</a></h3>
+            @*<p>@(post.Text.Length < 39 ? post.Text : post.Text.Substring(0, 39) + "...")</p>*@
+            <div class="read-more-date">
+                <a asp-action="Details" asp-controller="Posts" asp-route-id="@post.PostId">@Localizer["Read more..."]</a>
+                <span class="date">@post.CreatedDateTime.ToShortDateString() @Localizer["at"] @post.CreatedDateTime.ToShortTimeString()</span>
+            </div>
+            <br />
+            <ul class="tags">
+                @foreach (var tag in post.Tags)
+                {
+                <li><a href="#!">@tag.Name</a></li>
+                }
+            </ul>
+            <br />
+            <ul class="post-footer">
+                <li>
+                    <a href="#!" class="likeButton" data-postId="@post.PostId">
+                        <like-icon post-id="@post.PostId"></like-icon>
+                        <span id=@("likesNumber" + post.PostId)>@(post.Likes.Count)</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Posts" asp-action="Details" asp-fragment="comments" asp-route-id="@post.PostId">
+                        <i class="fas fa-comment"></i>
+                        @(post.Comments.Count)
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}

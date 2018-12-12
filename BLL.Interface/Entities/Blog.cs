@@ -9,6 +9,8 @@ namespace BLL.Interface.Entities
 
 		public string AuthorId { get; set; }
 
+		public ApplicationUser Author { get; set; }
+
 		public string BlogName { get; set; }
 
 		public string Description { get; set; }

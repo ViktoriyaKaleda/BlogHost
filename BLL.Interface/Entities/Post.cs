@@ -9,7 +9,11 @@ namespace BLL.Interface.Entities
 
 		public int BlogId { get; set; }
 
+		public Blog Blog { get; set; }
+
 		public string AuthorId { get; set; }
+
+		public ApplicationUser Author { get; set; }
 
 		public string Title { get; set; }
 

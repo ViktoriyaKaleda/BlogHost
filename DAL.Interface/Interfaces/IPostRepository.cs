@@ -17,6 +17,8 @@ namespace DAL.Interface.Interfaces
 
 		void AddPostLike(Post post, Like like);
 
+		Task<Like> GetPostLike(Post post, ApplicationUser user);
+
 		Task AddPostComment(Post post, Comment comment, int parentCommentId);
 		
 		Task Save();

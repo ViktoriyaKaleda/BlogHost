@@ -1,0 +1,19 @@
+﻿@model IEnumerable<Blog>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@foreach (var blog in Model)
+{
+    <div class="grid">
+        <div class="entry-media">
+            <img src="@Url.Content(blog.ImagePath ?? "~/images/slider-1.jpg")" alt="">
+        </div>
+        <div class="entry-body">
+            <span class="cat">@blog.Author.UserName</span>
+            <h3><a asp-action="Details" asp-controller="Blog" asp-route-id="@blog.BlogId">@blog.BlogName</a></h3>
+            <p>@(blog.Description.Length < 90 ? blog.Description : blog.Description.Substring(0, 90) + "...")</p>
+            <div class="read-more-date">
+                <a asp-action="Details" asp-controller="Blog" asp-route-id="@blog.BlogId">@Localizer["Read more..."]</a>
+            </div>
+        </div>
+    </div>
+}

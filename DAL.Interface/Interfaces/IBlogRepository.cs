@@ -1,5 +1,6 @@
 ﻿using DAL.Interface.DTO;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DAL.Interface.Interfaces
@@ -8,17 +9,21 @@ namespace DAL.Interface.Interfaces
 	{
 		Task<Blog> GetBlogById(int blogId);
 
+		IQueryable<Blog> GetAllBlogs();
+
 		Task<BlogStyle> GetBlogStyleById(int styleId);
+
+		Task<List<BlogStyle>> GetAllBlogStyles();
 
 		ApplicationUser GetBlogModeratorById(Blog blog, string id);
 
-		Task<List<ApplicationUser>> GetBlogModerators(int blogId);
+		Task<List<ApplicationUser>> GetAllBlogModerators(int blogId);
 
 		void AddBlog(Blog blog);
 
-		void UpdateBlog(Blog blog);
+		Task UpdateBlog(int blogId, string name, string description, int blogStyleId, string imagePath);
 
-		void DeleteBlog(Blog blog);
+		Task DeleteBlog(int blogId);
 
 		void AddBlogPost(Blog blog, Post post);
 
@@ -26,6 +31,6 @@ namespace DAL.Interface.Interfaces
 
 		Task DeleteBlogModerator(Blog blog, ApplicationUser user);
 
-		Task Save();
+		//Task Save(Blog blog);
 	}
 }

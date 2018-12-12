@@ -64,6 +64,11 @@ namespace DAL.Repositories
 			return await _context.Post.FirstOrDefaultAsync(m => m.PostId == id);
 		}
 
+		public async Task<Like> GetPostLike(Post post, ApplicationUser user)
+		{
+			return await _context.Like.FirstOrDefaultAsync(m => m.PostId == post.PostId && m.OwnerId == user.Id);
+		}
+
 		public async Task Save()
 		{
 			await _context.SaveChangesAsync();
@@ -71,7 +76,7 @@ namespace DAL.Repositories
 
 		public void UpdatePost(Post post)
 		{
-			_context.Post.Update(post);
+			_context.Update(post);
 		}
 	}
 }

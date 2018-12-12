@@ -11,6 +11,8 @@ namespace BLL.Interface.Interfaces
 
 		Task<List<Post>> GetAllPosts();
 
+		Task<Like> GetPostLike(Post post, ApplicationUser user);
+
 		Task AddPost(Post post, IFormFile image);
 
 		Task AddPostComment(int postId, ApplicationUser author, Comment comment, string parentCommentId);

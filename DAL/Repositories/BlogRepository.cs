@@ -1,6 +1,8 @@
-﻿using DAL.Interface.DTO;
+﻿using DAL.Extensions;
+using DAL.Interface.DTO;
 using DAL.Interface.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,31 +18,58 @@ namespace DAL.Repositories
 			_context = context;
 		}
 
-		public void AddBlog(Blog blog)
+		public async void AddBlog(Blog blog)
 		{
 			_context.Blog.Add(blog);
+			await _context.SaveChangesAsync();
 		}
 
-		public void AddBlogModerator(Blog blog, ApplicationUser user)
+		public async void AddBlogModerator(Blog blog, ApplicationUser user)
 		{
 			blog.BlogModerators.Add(new BlogModerator() { Blog = blog, Moderator = user });
+			_context.Update(blog);
+			await _context.SaveChangesAsync();
 		}
 
-		public void AddBlogPost(Blog blog, Post post)
+		public async void AddBlogPost(Blog blog, Post post)
 		{
 			blog.Posts.Add(post);
-			UpdateBlog(blog);
+			_context.Update(blog);
+			await _context.SaveChangesAsync();
 		}
 
-		public void DeleteBlog(Blog blog)
+		public async Task DeleteBlog(int blogId)
 		{
+			var blog = await GetBlogById(blogId);
+			var blogModerators = await GetAllBlogModerators(blogId);
+
+			if (blogModerators.Count != 0)
+			{
+				foreach (var blogModerator in blogModerators)
+				{
+					await DeleteBlogModerator(blog, blogModerator);
+				}
+			}
+
 			_context.Blog.Remove(blog);
+			await _context.SaveChangesAsync();
 		}
 
 		public async Task DeleteBlogModerator(Blog blog, ApplicationUser user)
 		{
 			var blogModerator = await _context.BlogModerator.FirstOrDefaultAsync(m => m.BlogId == blog.BlogId && m.ModeratorId == user.Id);
 			_context.BlogModerator.Remove(blogModerator);
+			await _context.SaveChangesAsync();
+		}
+
+		public IQueryable<Blog> GetAllBlogs()
+		{
+			return _context.Blog;
+		}
+
+		public async Task<List<BlogStyle>> GetAllBlogStyles()
+		{
+			return await _context.BlogStyle.ToListAsync();
 		}
 
 		public async Task<Blog> GetBlogById(int id)
@@ -53,7 +82,7 @@ namespace DAL.Repositories
 			return blog.BlogModerators.Select(m => m.Moderator).FirstOrDefault(m => m.Id == id);
 		}
 
-		public async Task<List<ApplicationUser>> GetBlogModerators(int blogId)
+		public async Task<List<ApplicationUser>> GetAllBlogModerators(int blogId)
 		{
 			var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == blogId);
 			return blog.BlogModerators.Select(m => m.Moderator).ToList();
@@ -64,14 +93,29 @@ namespace DAL.Repositories
 			return await _context.BlogStyle.FirstOrDefaultAsync(m => m.BlogStyleId == styleId);
 		}
 
-		public async Task Save()
-		{
-			await _context.SaveChangesAsync();
-		}
+		//public async Task Save(Blog blog)
+		//{
+		//	//_context.DetachLocal(blog, blog.BlogId);
+			
+		//	await _context.SaveChangesAsync();
+		//}
 
-		public void UpdateBlog(Blog blog)
+		public async Task UpdateBlog(int blogId, string name, string description, int blogStyleId, string imagePath)
 		{
-			_context.Blog.Update(blog);
+			var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == blogId);
+
+			blog.BlogName = name;
+			blog.Description = description;
+			blog.UpdatedDateTime = DateTime.Now;
+
+			if (imagePath != null)
+				blog.ImagePath = imagePath;
+
+			var style = await _context.BlogStyle.FirstOrDefaultAsync(m => m.BlogStyleId == blogStyleId);
+			blog.BlogStyle = style;
+			
+			_context.Update(blog);
+			await _context.SaveChangesAsync();
 		}
 	}
 }
