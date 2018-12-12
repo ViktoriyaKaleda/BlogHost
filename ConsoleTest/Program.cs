@@ -57,9 +57,9 @@ namespace ConsoleTest
 
 				var service = new AuthenticateService(rep);
 
-				var user =  service.GetUserByUsernamee("User1");
+				//var user =  service.GetUserByUsernamee("User1");
 
-				Console.WriteLine(user.FirstName);
+				//Console.WriteLine(user.FirstName);
 			}
 				
 		}		 
