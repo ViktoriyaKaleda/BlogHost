@@ -13,16 +13,16 @@ namespace BlogHost.Controllers
 {
 	public class AccountController : Controller
     {
-		private readonly IAccountService _accountService;
+		private readonly IAuthenticateService _service;
 		private readonly IImageService _imageService;
 		private readonly ILogger _logger;
 
 		public AccountController(
-			IAccountService accountService,
+			IAuthenticateService accountService,
 			IImageService imageService,
 			ILogger<AccountController> logger)
 		{
-			_accountService = accountService;
+			_service = accountService;
 			_imageService = imageService;
 			_logger = logger;
 		}
@@ -49,7 +49,7 @@ namespace BlogHost.Controllers
 			ViewData["ReturnUrl"] = returnUrl;
 			if (ModelState.IsValid)
 			{
-				var result = await _accountService.Login(model.Username, model.Password, model.RememberMe);
+				var result = await _service.Login(model.Username, model.Password, model.RememberMe);
 				if (result.Succeeded)
 				{
 					_logger.LogInformation("User logged in.");
@@ -95,10 +95,10 @@ namespace BlogHost.Controllers
 					user.AvatarPath = await _imageService.SaveAvatarImage(model.AvatarFile);
 				}
 
-				var result = await _accountService.CreateUser(user, model.Password);
+				var result = await _service.CreateUser(user, model.Password);
 				if (result.Succeeded)
 				{
-					await _accountService.Login(user.UserName, model.Password, false);
+					await _service.Login(user.UserName, model.Password, false);
 					_logger.LogInformation("User created a new account with password.");
 					return RedirectToLocal(returnUrl);
 				}
@@ -113,7 +113,7 @@ namespace BlogHost.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Logout()
 		{
-			await _accountService.Logout();
+			await _service.Logout();
 			_logger.LogInformation("User logged out.");
 			return RedirectToAction(nameof(HomeController.Index), "Home");
 		}

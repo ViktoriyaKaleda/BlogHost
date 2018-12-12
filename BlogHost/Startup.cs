@@ -92,6 +92,8 @@ namespace BlogHost
 
 			services.AddScoped<IUserRepository, UserRepository>();
 
+			services.AddScoped<IAuthenticateService, AuthenticateService>();
+
 			services.AddScoped<IAccountService, AccountService>();
 
 			services.AddSingleton<IImageService, ImageService>();

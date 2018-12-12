@@ -30,6 +30,8 @@ namespace DAL.Interface.Interfaces
 
 		Task Logout();
 
+		Task<ApplicationUser> GetCurrentUser(ClaimsPrincipal principal);
+
 		string GetUsername(ClaimsPrincipal principal);
 
 		bool IsSignedIn(ClaimsPrincipal principal);

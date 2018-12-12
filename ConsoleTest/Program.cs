@@ -31,7 +31,7 @@ namespace ConsoleTest
 			services.AddLogging();
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-			services.AddScoped<IAccountService, AccountService>();
+			services.AddScoped<IAuthenticateService, AuthenticateService>();
 
 			services.AddScoped<SignInManager<DAL.Interface.DTO.ApplicationUser>, SignInManager<DAL.Interface.DTO.ApplicationUser>>();
 		}
@@ -55,7 +55,7 @@ namespace ConsoleTest
 				var rep = new UserRepository(serviceProvider.GetRequiredService<UserManager<DAL.Interface.DTO.ApplicationUser>>()
 					, context, signInManager);
 
-				var service = new AccountService(rep);
+				var service = new AuthenticateService(rep);
 
 				var user =  service.GetUserByUsernamee("User1");
 

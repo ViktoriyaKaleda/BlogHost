@@ -114,5 +114,10 @@ namespace DAL.Repositories
 		{
 			return _signInManager.IsSignedIn(principal);
 		}
+
+		public async Task<ApplicationUser> GetCurrentUser(ClaimsPrincipal principal)
+		{
+			return await _userManager.GetUserAsync(principal);
+		}
 	}
 }
