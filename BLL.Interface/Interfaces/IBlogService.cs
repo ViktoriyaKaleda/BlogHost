@@ -8,17 +8,17 @@ namespace BLL.Interface.Interfaces
 	{
 		Task<Blog> GetBlogById(int id);
 
-		ApplicationUser GetBlogModeratorById(string id);
+		Task<ApplicationUser> GetBlogModeratorById(int blogId, string id);
 
-		Task AddBlogModerator(ApplicationUser user);
+		Task AddBlogModerator(Blog blog, ApplicationUser user);
 
-		Task DeleteBlogModerator(ApplicationUser user);
+		Task DeleteBlogModerator(Blog blog, ApplicationUser user);
 
 		Task<BlogStyle> GetBlogStyleById(int id);
 
-		Task AddBlog(Blog blog, int blogStyleId, IFormFile image);
+		Task AddBlog(Blog blog, int blogStyleId);
 
-		Task UpdateBlog(int id, string name, string description, int BlogStyleId, IFormFile image);
+		Task UpdateBlog(Blog blog, string name, string description, int blogStyleId);
 
 		Task DeleteBlog(int id);
 	}

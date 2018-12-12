@@ -353,8 +353,6 @@ namespace BlogHosting.Controllers
 
 				blog.BlogStyle = style;
 
-				blog.ImagePath = style.DefaultImagePath;
-
 				if (viewModel.ImageFile?.FileName != null)
 				{
 					blog.ImagePath = await _imageService.SaveBlogImage(viewModel.ImageFile, blog.ImagePath);
