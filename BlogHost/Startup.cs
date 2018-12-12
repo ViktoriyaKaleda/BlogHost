@@ -3,10 +3,12 @@ using AutoMapper;
 using BLL.Interface.Interfaces;
 using BLL.Mappers;
 using BLL.Services;
+using BlogHost.Requirements;
 using BlogHost.Services;
 using DAL.Interface.DTO;
 using DAL.Interface.Interfaces;
 using DAL.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -88,13 +90,42 @@ namespace BlogHost
 				o.EnableDetailedErrors = true;
 			});
 
+			services.AddAuthorization(options =>
+			{
+				options.AddPolicy("OwnerPolicy", policy =>
+					policy.Requirements.Add(new OwnerRequirement()));
+
+				options.AddPolicy("ModeratorPolicy", policy =>
+					policy.Requirements.Add(new ModeratorRequirement()));
+			});
+
+			services.AddScoped<IAuthorizationHandler,
+						  BlogOwnerAuthorizationHandler>();
+
+			services.AddScoped<IAuthorizationHandler,
+						  PostOwnerAuthorizationHandler>();
+
+			services.AddScoped<IAuthorizationHandler,
+						  CommentOwnerAuthorizationHandler>();
+
+			services.AddScoped<IAuthorizationHandler,
+						  BlogModeratorAuthorizationHandler>();
+
 			MapperInitializer.MapperConfiguration();
 
 			services.AddScoped<IUserRepository, UserRepository>();
 
+			services.AddScoped<IBlogRepository, BlogRepository>();
+
+			services.AddScoped<IPostRepository, PostRepository>();
+
 			services.AddScoped<IAuthenticateService, AuthenticateService>();
 
 			services.AddScoped<IAccountService, AccountService>();
+
+			services.AddScoped<IBlogService, BlogService>();
+
+			services.AddScoped<IPostService, PostService>();
 
 			services.AddSingleton<IImageService, ImageService>();
 		}
@@ -124,11 +155,11 @@ namespace BlogHost
 
 			app.UseAuthentication();
 
-			using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-			{
-				var userManager = serviceScope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
-				DAL.Configurations.ApplicationDbInitializer.SeedUsers(userManager);
-			}				
+			//using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+			//{
+			//	var userManager = serviceScope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
+			//	DAL.Configurations.ApplicationDbInitializer.SeedUsers(userManager);
+			//}				
 
 			app.UseMvc(routes =>
 			{
