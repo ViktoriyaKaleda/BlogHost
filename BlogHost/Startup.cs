@@ -3,6 +3,7 @@ using AutoMapper;
 using BLL.Interface.Interfaces;
 using BLL.Mappers;
 using BLL.Services;
+using BlogHost.Hubs;
 using BlogHost.Requirements;
 using BlogHost.Services;
 using DAL.Interface.DTO;
@@ -128,6 +129,8 @@ namespace BlogHost
 			services.AddScoped<IPostService, PostService>();
 
 			services.AddSingleton<IImageService, ImageService>();
+
+			services.AddSignalR();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -166,6 +169,16 @@ namespace BlogHost
 				routes.MapRoute(
 					name: "default",
 					template: "{controller=Home}/{action=Index}/{id?}");
+			});
+
+			app.UseSignalR(routes =>
+			{
+				routes.MapHub<ChatHub>("/setLike");
+			});
+
+			app.UseSignalR(routes =>
+			{
+				routes.MapHub<CommentReplyHub>("/showReply");
 			});
 		}
 	}
