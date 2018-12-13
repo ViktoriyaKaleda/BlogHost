@@ -20,9 +20,9 @@ namespace BLL.Services
 			_repository = repository;			
 		}
 
-		public async Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string oldPassword, string newPassword)
+		public async Task<IdentityResult> ChangePasswordAsync(string userId, string oldPassword, string newPassword)
 		{
-			return await _repository.ChangePassword(Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user), oldPassword, newPassword);
+			return await _repository.ChangePassword(userId, oldPassword, newPassword);
 		}
 
 		public async Task<ApplicationUser> GetCurrentUser(ClaimsPrincipal principal)
@@ -30,32 +30,29 @@ namespace BLL.Services
 			return Mapper.Map<ApplicationUser>(await _repository.GetCurrentUser(principal));
 		}
 
-		public async Task UpdateAvatarAsync(ApplicationUser user, string imagePath)
+		public async Task UpdateAvatarAsync(string userId, string imagePath)
 		{
-			user.AvatarPath = imagePath;
-			await _repository.UpdateUser(Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user));
+			await _repository.UpdateAvatarAsync(userId, imagePath);
 		}
 
-		public async Task<IdentityResult> UpdateEmailAsync(ApplicationUser user, string email)
+		public async Task<IdentityResult> UpdateEmailAsync(string userId, string email)
 		{
-			return await _repository.UpdateEmailAsync(Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user), email);
+			return await _repository.UpdateEmailAsync(userId, email);
 		}
 
-		public async Task UpdateFirstNameAsync(ApplicationUser user, string firstName)
+		public async Task UpdateFirstNameAsync(string userId, string firstName)
 		{
-			user.FirstName = firstName;
-			await _repository.UpdateUser(Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user));
+			await _repository.UpdateFirstNameAsync(userId, firstName);
 		}
 
-		public async Task UpdateLastNameAsync(ApplicationUser user, string lastName)
+		public async Task UpdateLastNameAsync(string userId, string lastName)
 		{
-			user.LastName = lastName;
-			await _repository.UpdateUser(Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user));
+			await _repository.UpdateLastNameAsync(userId, lastName);
 		}
 
-		public async Task<IdentityResult> UpdatePhoneNumberAsync(ApplicationUser user, string phoneNumber)
+		public async Task<IdentityResult> UpdatePhoneNumberAsync(string userId, string phoneNumber)
 		{
-			return await _repository.UpdatePhoneNumberAsync(Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user), phoneNumber);
+			return await _repository.UpdatePhoneNumberAsync(userId, phoneNumber);
 		}
 
 		public async Task<ApplicationUser> GetUserByUsername(string username)

@@ -15,14 +15,16 @@ namespace BLL.Interface.Interfaces
 
 		bool IsSignedIn(ClaimsPrincipal principal);
 
-		Task<IdentityResult> UpdateEmailAsync(ApplicationUser user, string email);
+		Task<IdentityResult> UpdateEmailAsync(string userId, string email);
 
-		Task<IdentityResult> UpdatePhoneNumberAsync(ApplicationUser user, string phoneNumber);
+		Task<IdentityResult> UpdatePhoneNumberAsync(string userId, string phoneNumber);
 
-		Task UpdateFirstNameAsync(ApplicationUser user, string firstName);
+		Task UpdateFirstNameAsync(string userId, string firstName);
 
-		Task UpdateLastNameAsync(ApplicationUser user, string lastName);
+		Task UpdateLastNameAsync(string userId, string lastName);
 
-		Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string oldPassword, string newPassword);
+		Task UpdateAvatarAsync(string userId, string imagePath);
+
+		Task<IdentityResult> ChangePasswordAsync(string userId, string oldPassword, string newPassword);
 	}
 }

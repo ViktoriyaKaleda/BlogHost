@@ -70,11 +70,6 @@ namespace DAL.Repositories
 			return _context.Users.FirstOrDefault(m => m.UserName == username);
 		}
 
-		public async Task UpdateUser(ApplicationUser user)
-		{
-			await _userManager.UpdateAsync(user);
-		}
-
 		public async Task<SignInResult> Login(string username, string password, bool rememberMe)
 		{
 			return await _signInManager.PasswordSignInAsync(username, password, rememberMe, lockoutOnFailure: false);
@@ -90,18 +85,21 @@ namespace DAL.Repositories
 			await _signInManager.SignOutAsync();
 		}
 
-		public async Task<IdentityResult> ChangePassword(ApplicationUser user, string oldPassword, string newPassword)
+		public async Task<IdentityResult> ChangePassword(string userId, string oldPassword, string newPassword)
 		{
+			var user = await GetUserById(userId);
 			return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
 		}
 
-		public async Task<IdentityResult> UpdateEmailAsync(ApplicationUser user, string newEmail)
+		public async Task<IdentityResult> UpdateEmailAsync(string userId, string newEmail)
 		{
+			var user = await GetUserById(userId);
 			return await _userManager.SetEmailAsync(user, newEmail);
 		}
 
-		public async Task<IdentityResult> UpdatePhoneNumberAsync(ApplicationUser user, string newPhoneNumber)
+		public async Task<IdentityResult> UpdatePhoneNumberAsync(string userId, string newPhoneNumber)
 		{
+			var user = await GetUserById(userId);
 			return await _userManager.SetPhoneNumberAsync(user, newPhoneNumber);
 		}
 
@@ -118,6 +116,27 @@ namespace DAL.Repositories
 		public async Task<ApplicationUser> GetCurrentUser(ClaimsPrincipal principal)
 		{
 			return await _userManager.GetUserAsync(principal);
+		}
+
+		public async Task UpdateFirstNameAsync(string userId, string firstName)
+		{
+			var user = await GetUserById(userId);
+			user.FirstName = firstName;
+			await _userManager.UpdateAsync(user);
+		}
+
+		public async Task UpdateLastNameAsync(string userId, string lastName)
+		{
+			var user = await GetUserById(userId);
+			user.LastName = lastName;
+			await _userManager.UpdateAsync(user);
+		}
+
+		public async Task UpdateAvatarAsync(string userId, string imagePath)
+		{
+			var user = await GetUserById(userId);
+			user.AvatarPath = imagePath;
+			await _userManager.UpdateAsync(user);
 		}
 	}
 }

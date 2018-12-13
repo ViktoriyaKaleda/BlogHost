@@ -14,13 +14,17 @@ namespace DAL.Interface.Interfaces
 
 		Task<IdentityResult> AddUser(ApplicationUser user, string password);
 
-		Task UpdateUser(ApplicationUser user);
+		Task UpdateFirstNameAsync(string userId, string firstName);
 
-		Task<IdentityResult> UpdateEmailAsync(ApplicationUser user, string newEmail);
+		Task UpdateLastNameAsync(string userId, string lastName);
 
-		Task<IdentityResult> UpdatePhoneNumberAsync(ApplicationUser user, string newPhoneNumber);
+		Task<IdentityResult> UpdateEmailAsync(string userId, string newEmail);
 
-		Task<IdentityResult> ChangePassword(ApplicationUser user,string oldPassword, string newPassword);
+		Task<IdentityResult> UpdatePhoneNumberAsync(string userId, string newPhoneNumber);
+
+		Task UpdateAvatarAsync(string userId, string imagePath);
+
+		Task<IdentityResult> ChangePassword(string userId, string oldPassword, string newPassword);
 
 		Task DeleteUser(ApplicationUser user);
 

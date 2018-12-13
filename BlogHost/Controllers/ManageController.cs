@@ -35,11 +35,8 @@ namespace BlogHost.Controllers
 		public async Task<IActionResult> Index()
 		{
 			var user = await _accountService.GetCurrentUser(User);
-
 			if (user == null)
-			{
 				throw new ApplicationException($"Unable to load user with Name '{User.Identity.Name}'.");
-			}
 
 			var model = new IndexViewModel
 			{
@@ -61,21 +58,16 @@ namespace BlogHost.Controllers
 		public async Task<IActionResult> Index(IndexViewModel model, string username = null)
 		{
 			if (!ModelState.IsValid)
-			{
 				return View(model);
-			}
 
 			var user = await _accountService.GetCurrentUser(User);
-
 			if (user == null)
-			{
 				throw new ApplicationException($"Unable to load user with Name '{User.Identity.Name}'.");
-			}
 
 			var email = user.Email;
 			if (model.Email != email)
 			{
-				var setEmailResult = await _accountService.UpdateEmailAsync(user, model.Email);
+				var setEmailResult = await _accountService.UpdateEmailAsync(user.Id, model.Email);
 				if (!setEmailResult.Succeeded)
 				{
 					throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
@@ -85,7 +77,7 @@ namespace BlogHost.Controllers
 			var phoneNumber = user.PhoneNumber;
 			if (model.PhoneNumber != phoneNumber)
 			{
-				var setPhoneResult = await _accountService.UpdatePhoneNumberAsync(user, model.PhoneNumber);
+				var setPhoneResult = await _accountService.UpdatePhoneNumberAsync(user.Id, model.PhoneNumber);
 				if (!setPhoneResult.Succeeded)
 				{
 					throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
@@ -95,17 +87,14 @@ namespace BlogHost.Controllers
 			if (model.AvatarFile?.FileName != null)
 			{
 				user.AvatarPath = await _imageService.SaveAvatarImage(model.AvatarFile, user.AvatarPath);
+				await _accountService.UpdateAvatarAsync(user.Id, user.AvatarPath);
 			}
 
 			if (model.FirstName != user.FirstName)
-			{
-				await _accountService.UpdateFirstNameAsync(user, model.FirstName);
-			}
+				await _accountService.UpdateFirstNameAsync(user.Id, model.FirstName);
 
 			if (model.LastName != user.LastName)
-			{
-				await _accountService.UpdateLastNameAsync(user, model.LastName);
-			}
+				await _accountService.UpdateLastNameAsync(user.Id, model.LastName);
 			
 			StatusMessage = "Profile has been updated";
 
@@ -124,17 +113,13 @@ namespace BlogHost.Controllers
 		public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
 		{
 			if (!ModelState.IsValid)
-			{
 				return View(model);
-			}
 
 			var user = await _accountService.GetCurrentUser(User);
 			if (user == null)
-			{
 				throw new ApplicationException($"Unable to load user with Name '{User.Identity.Name}'.");
-			}
 
-			var changePasswordResult = await _accountService.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+			var changePasswordResult = await _accountService.ChangePasswordAsync(user.Id, model.OldPassword, model.NewPassword);
 			if (!changePasswordResult.Succeeded)
 			{
 				AddErrors(changePasswordResult);
