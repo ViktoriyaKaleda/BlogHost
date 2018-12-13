@@ -48,6 +48,11 @@ namespace BLL.Services
 			await _repository.DeletePost(id);
 		}
 
+		public async Task DeletePostComment(int commentId)
+		{
+			await _repository.DeletePostComment(commentId);
+		}
+
 		public async Task DeletePostLike(int postId, int likeId)
 		{
 			await _repository.DeletePostLike(postId, likeId);
@@ -61,6 +66,11 @@ namespace BLL.Services
 		public async Task<Post> GetPostById(int id)
 		{
 			return Mapper.Map<Post>(await _repository.GetPostById(id));
+		}
+
+		public async Task<Comment> GetPostComment(int commentId)
+		{
+			return Mapper.Map<Comment>(await _repository.GetPostComment(commentId));
 		}
 
 		public async Task<Like> GetPostLike(Post post, ApplicationUser user)

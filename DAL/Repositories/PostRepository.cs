@@ -129,5 +129,24 @@ namespace DAL.Repositories
 			
 			await _context.SaveChangesAsync();
 		}
+
+		public async Task<Comment> GetPostComment(int commentId)
+		{
+			return await _context.Comment.FirstOrDefaultAsync(m => m.CommentId == commentId);
+		}
+
+		public async Task DeletePostComment(int commentId)
+		{
+			var comment = await GetPostComment(commentId);
+
+			foreach (var c in comment.ChildComments)
+			{
+				c.ParentCommentId = 0;
+				_context.Comment.Update(c);
+			}
+
+			_context.Comment.Remove(comment);
+			await _context.SaveChangesAsync();
+		}
 	}
 }

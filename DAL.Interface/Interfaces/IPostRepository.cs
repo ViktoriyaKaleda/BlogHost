@@ -27,7 +27,11 @@ namespace DAL.Interface.Interfaces
 
 		Task<Like> GetPostLike(Post post, ApplicationUser user);
 
+		Task<Comment> GetPostComment(int commentId);
+
 		Task AddPostComment(int postId, ApplicationUser author, Comment comment, int parentCommentId);
+
+		Task DeletePostComment(int commentId);
 
 		bool PostExists(int id);
 	}

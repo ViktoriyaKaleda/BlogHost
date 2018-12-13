@@ -12,6 +12,8 @@ namespace BLL.Interface.Interfaces
 
 		Task<Like> GetPostLike(Post post, ApplicationUser user);
 
+		Task<Comment> GetPostComment(int commentId);
+
 		List<Post> GetAllPosts();
 
 		Task AddPost(Post post);
@@ -27,6 +29,8 @@ namespace BLL.Interface.Interfaces
 		Task DeletePost(int id);
 
 		Task DeletePostLike(int postId, int likeId);
+
+		Task DeletePostComment(int commentId);
 
 		bool PostExists(int id);
 	}
