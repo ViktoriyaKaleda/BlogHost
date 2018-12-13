@@ -1,0 +1,145 @@
+﻿@model BLL.Interface.Entities.Post
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+<div class="container">
+    <div class="row">
+        <!-- Post Content Column -->
+        <div class="col-lg-8">
+            <!-- Title -->
+            <h1 class="mt-4">@Model.Title.ToUpper()</h1>
+            <!-- Author -->
+            <p class="lead">
+                @Localizer["by"] @Model.Author.UserName
+            </p>
+            @if ((await AuthorizationService.AuthorizeAsync(User, Model, "OwnerPolicy")).Succeeded)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.PostId"><i class="fas fa-pencil-alt" style="cursor: pointer; color: black; margin-right: 1rem;"></i></a>
+            }
+            @if ((await AuthorizationService.AuthorizeAsync(User, Model, "OwnerPolicy")).Succeeded
+             || (await AuthorizationService.AuthorizeAsync(User, Model.Blog, "ModeratorPolicy")).Succeeded)
+            {
+                <a asp-action="Delete" asp-route-id="@Model.PostId">Delete</a>
+            }
+            <!-- Date/Time -->
+            <p>@Localizer["Posted on"] @Model.CreatedDateTime.ToShortDateString() @Localizer["at"] @Model.CreatedDateTime.ToShortTimeString()</p>
+            <hr>
+            <!-- Image -->
+            <img class="rounded img-responsive" src="@Url.Content(Model.ImagePath ?? Model.Blog.ImagePath ?? "~/images/slider-1.jpg")" alt="">
+            <hr>
+            <!-- Post Content -->
+            @Html.Raw(Model.Text)
+
+            <hr>
+            <ul class="tags">
+                @foreach (var tag in @Model.Tags)
+                {
+                    <li><a href="#!">@tag.Name</a></li>
+                }
+            </ul>
+            <div class="post-icons-area">
+                <ul class="post-icons">
+                    <li class="like">
+                        <a href="#!" class="likeButton" data-postId="@Model.PostId">
+                            <like-icon post-id="@Model.PostId"></like-icon>
+                            <span id=@("likesNumber" + @Model.PostId)>@(Model.Likes?.Count ?? 0)</span>
+                        </a>
+                    </li>
+                    <li><a href="#comments"><i class="fas fa-comment"></i>@(Model.Comments?.Count ?? 0)</a></li>
+                </ul>
+            </div>
+            <hr>
+            <!-- Comments Form -->
+            <div class="card my-4">
+                <h4 class="card-header">@Localizer["Leave a Comment:"]</h4>
+                <div class="card-body">
+                    <form asp-action="PostComment">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <textarea id="commentText" name="Text" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Text" class="text-danger"></span>
+                            <input id="parentCommentId" name="parentCommentId" type="hidden" data-parentId="null" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">@Localizer["Post comment"]</button>
+                    </form>
+                </div>
+            </div>
+            <h3 id="comments">@Localizer["Comments"] (<span id="commentsNumber">@($"{Model.Comments?.Count ?? 0}")</span>)</h3>
+            @if (Model.Comments?.Count > 0)
+            {
+                <br />
+                <div id="commentsContainer">
+                    <partial name="~/Views/Post/_CommentPartial.cshtml" model="@Model.Comments.Where(m => m.ParentCommentId == 0).ToList()" />
+                </div>
+            }
+            <content>
+                <div id="errorBox">
+                    <span style="display: none;" id="errorMessage" name="errorMessage" class="text-danger" />
+                </div>
+                <div id="infoBox">
+                    <span style="display: none;" id="infoMessage" name="message" class="text-info" />
+                </div>
+                <div id="successBox">
+                    <span style="display: none;" id="successMessage" name="successMessage" class="text-success" />
+                </div>
+            </content>
+        </div>
+        <div class="col-md-4">
+            @await Component.InvokeAsync("MostPopularPosts", new { authorId = Model.Author.Id, postId = Model.PostId })
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+<script>
+    function ShowMessage(msg, element) {
+        element.text(msg);
+        if (element.is(":hidden")) {
+            element.toggle();
+            setTimeout(function () {
+                element.fadeOut('fast');
+            }, 3000);
+        }
+    }
+
+    function addDeleteListener() {
+        var deleteButtons = document.getElementsByClassName("deleteBtn");
+        for (let i = 0; i < deleteButtons.length; i++) {
+            deleteButtons[i].addEventListener("click", function (event) {
+                const commentId = this.getAttribute('id');
+                DeleteComment(commentId);
+                event.preventDefault();
+            })
+        };
+    }
+
+    function DeleteComment(inputText) {
+        $.ajax({
+            url: @Model.PostId + "/DeleteComment",
+            type: 'POST',
+            data: JSON.stringify(inputText),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'html',
+            success: (result) => {
+                $('#commentsContainer').html(result);
+                ShowMessage("Comment was deleted.", $('#infoMessage'));
+                console.log($('#commentsNumber'));
+                const commentsNumber = $('#commentsNumber').text();
+                $('#commentsNumber').text(commentsNumber - 1);
+                addDeleteListener();
+            },
+            error: function (jxqr, error, status) {
+                ShowMessage(jxqr.responseText, $('#errorMessage'));
+            },
+        })
+    }
+
+    $(document).ready(() => {      
+        addDeleteListener();
+    });
+
+     document.body.style.background = "@Model.Blog.BlogStyle.BackgrounsColor";
+     document.body.style.color = "@Model.Blog.BlogStyle.TitlesFontColor";
+     document.body.style.fontFamily = "@Model.Blog.BlogStyle.TitlesFontName";
+    </script>
+} 

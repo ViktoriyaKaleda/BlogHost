@@ -1,4 +1,6 @@
 ﻿using DAL.Interface.DTO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DAL.Interface.Interfaces
@@ -7,20 +9,26 @@ namespace DAL.Interface.Interfaces
 	{
 		Task<Post> GetPostById(int id);
 
-		void UpdatePost(Post post);
+		List<Post> GetAllPosts();
 
-		void AddPost(Post post);
+		Task UpdatePost(int postId, string title, string text, string imagePath);
 
-		void DeletePost(Post post);
+		Task AddPost(Post post);
 
-		void AddPostTag(Post post, Tag tag);
+		Task DeletePost(int postId);
 
-		void AddPostLike(Post post, Like like);
+		Task AddPostTag(int postId, Tag tag);
+
+		Task AddPostTags(List<Tag> tags);
+
+		Task AddPostLike(int postId, Like like);
+
+		Task DeletePostLike(int postId, int likeId);
 
 		Task<Like> GetPostLike(Post post, ApplicationUser user);
 
-		Task AddPostComment(Post post, Comment comment, int parentCommentId);
-		
-		Task Save();
+		Task AddPostComment(int postId, ApplicationUser author, Comment comment, int parentCommentId);
+
+		bool PostExists(int id);
 	}
 }

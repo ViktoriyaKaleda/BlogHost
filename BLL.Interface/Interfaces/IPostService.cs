@@ -1,6 +1,7 @@
 ﻿using BLL.Interface.Entities;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BLL.Interface.Interfaces
@@ -9,16 +10,24 @@ namespace BLL.Interface.Interfaces
 	{
 		Task<Post> GetPostById(int id);
 
-		Task<List<Post>> GetAllPosts();
-
 		Task<Like> GetPostLike(Post post, ApplicationUser user);
 
-		Task AddPost(Post post, IFormFile image);
+		List<Post> GetAllPosts();
 
-		Task AddPostComment(int postId, ApplicationUser author, Comment comment, string parentCommentId);
+		Task AddPost(Post post);
 
-		Task UpdatePost(int id, string title, string text, IFormFile image, List<Tag> tags);
+		Task AddPostComment(int postId, ApplicationUser author, Comment comment, int parentCommentId);
+
+		Task AddPostTags(List<Tag> tags);
+
+		Task AddPostLike(int postId, Like like);
+
+		Task UpdatePost(int id, string title, string text, string imagePath);
 
 		Task DeletePost(int id);
+
+		Task DeletePostLike(int postId, int likeId);
+
+		bool PostExists(int id);
 	}
 }

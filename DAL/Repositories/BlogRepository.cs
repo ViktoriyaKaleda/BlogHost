@@ -1,5 +1,4 @@
-﻿using DAL.Extensions;
-using DAL.Interface.DTO;
+﻿using DAL.Interface.DTO;
 using DAL.Interface.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -92,13 +91,6 @@ namespace DAL.Repositories
 		{
 			return await _context.BlogStyle.FirstOrDefaultAsync(m => m.BlogStyleId == styleId);
 		}
-
-		//public async Task Save(Blog blog)
-		//{
-		//	//_context.DetachLocal(blog, blog.BlogId);
-			
-		//	await _context.SaveChangesAsync();
-		//}
 
 		public async Task UpdateBlog(int blogId, string name, string description, int blogStyleId, string imagePath)
 		{

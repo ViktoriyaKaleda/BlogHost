@@ -5,3 +5,5 @@
 @using BLL.Interface.Entities
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper "*, BlogHost"
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService

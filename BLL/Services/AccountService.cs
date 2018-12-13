@@ -74,5 +74,10 @@ namespace BLL.Services
 		{
 			return _repository.IsSignedIn(principal);
 		}
+
+		public async Task<ApplicationUser> GetUserById(string id)
+		{
+			return Mapper.Map<ApplicationUser>(await _repository.GetUserById(id));
+		}
 	}
 }

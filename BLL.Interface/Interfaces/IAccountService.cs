@@ -11,6 +11,8 @@ namespace BLL.Interface.Interfaces
 
 		Task<ApplicationUser> GetUserByUsername(string username);
 
+		Task<ApplicationUser> GetUserById(string id);
+
 		string GetUsername(ClaimsPrincipal principal);
 
 		bool IsSignedIn(ClaimsPrincipal principal);

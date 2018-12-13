@@ -5,6 +5,7 @@ using DAL.Interface.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BLL.Services
@@ -18,24 +19,43 @@ namespace BLL.Services
 			_repository = repository;
 		}
 
-		public Task AddPost(Post post, IFormFile image)
+		public async Task AddPost(Post post)
 		{
-			throw new NotImplementedException();
+			if (post.ImagePath == null)
+				post.ImagePath = post.Blog.BlogStyle.DefaultImagePath;
+
+			await _repository.AddPost(Mapper.Map<DAL.Interface.DTO.Post>(post));
 		}
 
-		public Task AddPostComment(int postId, ApplicationUser author, Comment comment, string parentCommentId)
+		public async Task AddPostComment(int postId, ApplicationUser author, Comment comment, int parentCommentId)
 		{
-			throw new NotImplementedException();
+			await _repository.AddPostComment(postId, Mapper.Map<DAL.Interface.DTO.ApplicationUser>(author),
+				Mapper.Map<DAL.Interface.DTO.Comment>(comment), parentCommentId);
 		}
 
-		public Task DeletePost(int id)
+		public async Task AddPostLike(int postId, Like like)
 		{
-			throw new NotImplementedException();
+			await _repository.AddPostLike(postId, Mapper.Map<DAL.Interface.DTO.Like>(like));
 		}
 
-		public Task<List<Post>> GetAllPosts()
+		public async Task AddPostTags(List<Tag> tags)
 		{
-			throw new NotImplementedException();
+			await _repository.AddPostTags(Mapper.Map<List<DAL.Interface.DTO.Tag>>(tags));
+		}
+
+		public async Task DeletePost(int id)
+		{
+			await _repository.DeletePost(id);
+		}
+
+		public async Task DeletePostLike(int postId, int likeId)
+		{
+			await _repository.DeletePostLike(postId, likeId);
+		}
+
+		public List<Post> GetAllPosts()
+		{
+			return Mapper.Map<List<Post>>(_repository.GetAllPosts());
 		}
 
 		public async Task<Post> GetPostById(int id)
@@ -49,9 +69,14 @@ namespace BLL.Services
 				Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user)));
 		}
 
-		public Task UpdatePost(int id, string title, string text, IFormFile image, List<Tag> tags)
+		public bool PostExists(int id)
 		{
-			throw new NotImplementedException();
+			return _repository.PostExists(id);
+		}
+
+		public async Task UpdatePost(int id, string title, string text, string imagePath)
+		{
+			await _repository.UpdatePost(id, title, text, imagePath);
 		}
 	}
 }

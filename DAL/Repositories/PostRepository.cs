@@ -3,7 +3,7 @@ using DAL.Interface.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DAL.Repositories
@@ -17,46 +17,65 @@ namespace DAL.Repositories
 			_context = context;
 		}
 
-		public void AddPost(Post post)
+		public async Task AddPost(Post post)
 		{
 			_context.Post.Add(post);
+			await _context.SaveChangesAsync();
 		}
 
-		public async Task AddPostComment(Post post, Comment comment, int parentCommentId)
+		public async Task AddPostComment(int postId, ApplicationUser author, Comment comment, int parentCommentId)
 		{
-			_context.Comment.Add(comment);
+			var post = await GetPostById(postId);
 
+			comment.Author = author;
+			comment.Post = post;
+			comment.CreatedDate = DateTime.Now;
+			comment.UpdatedDate = comment.UpdatedDate;
 			if (parentCommentId != 0)
 			{
+				comment.ParentCommentId = (int)parentCommentId;
+
 				var parentComment = await _context.Comment.Include(m => m.ChildComments).SingleOrDefaultAsync(m => m.CommentId == parentCommentId);
 				if (parentComment != null)
 				{
 					parentComment.ChildComments.Add(comment);
 					_context.Update(parentComment);
 				}
-			}
+			}				
 
+			_context.Comment.Add(comment);
+			
 			post.Comments.Add(comment);
 			_context.Update(post);
+
+			await _context.SaveChangesAsync();
 		}
 
-		public void AddPostLike(Post post, Like like)
+		public async Task AddPostLike(int postId, Like like)
 		{
-			_context.Like.Add(like);
+			var post = await GetPostById(postId);
 			post.Likes.Add(like);
 			_context.Update(post);
+
+			await _context.SaveChangesAsync();
 		}
 
-		public void AddPostTag(Post post, Tag tag)
+		public async Task AddPostTag(int postId, Tag tag)
 		{
 			_context.Tag.Add(tag);
+
+			var post = await GetPostById(postId);
 			post.Tags.Add(tag);
 			_context.Update(post);
+
+			await _context.SaveChangesAsync();
 		}
 
-		public void DeletePost(Post post)
+		public async Task DeletePost(int postId)
 		{
+			var post = await GetPostById(postId);
 			_context.Post.Remove(post);
+			await _context.SaveChangesAsync();
 		}
 
 		public async Task<Post> GetPostById(int id)
@@ -69,14 +88,46 @@ namespace DAL.Repositories
 			return await _context.Like.FirstOrDefaultAsync(m => m.PostId == post.PostId && m.OwnerId == user.Id);
 		}
 
-		public async Task Save()
+		public async Task UpdatePost(int postId, string title, string text, string imagePath)
 		{
+			var post = await GetPostById(postId);
+
+			post.Title = title;
+			post.Text = text;
+			post.UpdatedDateTime = DateTime.Now;
+
+			if (imagePath != null)
+				post.ImagePath = imagePath;
+
+			_context.Update(post);
 			await _context.SaveChangesAsync();
 		}
 
-		public void UpdatePost(Post post)
+		public bool PostExists(int id)
 		{
+			return _context.Post.Any(e => e.PostId == id);
+		}
+
+		public async Task AddPostTags(List<Tag> tags)
+		{
+			await _context.Tag.AddRangeAsync(tags);
+			await _context.SaveChangesAsync();
+		}
+
+		public List<Post> GetAllPosts()
+		{
+			return _context.Post.ToList();
+		}
+
+		public async Task DeletePostLike(int postId, int likeId)
+		{
+			var post = await GetPostById(postId);
+			var like = _context.Like.FirstOrDefault(m => m.LikeId == likeId);
+
+			post.Likes.Remove(like);
 			_context.Update(post);
+			
+			await _context.SaveChangesAsync();
 		}
 	}
 }

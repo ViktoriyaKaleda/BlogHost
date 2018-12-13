@@ -10,10 +10,10 @@
         </div>
         <div class="entry-body">
             <span class="cat">@post.Author.UserName</span>
-            <h3><a asp-action="Details" asp-controller="Posts" asp-route-id="@post.PostId">@post.Title</a></h3>
+            <h3><a asp-action="Details" asp-controller="Post" asp-route-id="@post.PostId">@post.Title</a></h3>
             @*<p>@(post.Text.Length < 39 ? post.Text : post.Text.Substring(0, 39) + "...")</p>*@
             <div class="read-more-date">
-                <a asp-action="Details" asp-controller="Posts" asp-route-id="@post.PostId">@Localizer["Read more..."]</a>
+                <a asp-action="Details" asp-controller="Post" asp-route-id="@post.PostId">@Localizer["Read more..."]</a>
                 <span class="date">@post.CreatedDateTime.ToShortDateString() @Localizer["at"] @post.CreatedDateTime.ToShortTimeString()</span>
             </div>
             <br />
@@ -32,7 +32,7 @@
                     </a>
                 </li>
                 <li>
-                    <a asp-controller="Posts" asp-action="Details" asp-fragment="comments" asp-route-id="@post.PostId">
+                    <a asp-controller="Post" asp-action="Details" asp-fragment="comments" asp-route-id="@post.PostId">
                         <i class="fas fa-comment"></i>
                         @(post.Comments.Count)
                     </a>
