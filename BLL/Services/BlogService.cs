@@ -30,9 +30,9 @@ namespace BLL.Services
 			_repository.AddBlog(Mapper.Map<DAL.Interface.DTO.Blog>(blog));
 		}
 
-		public async Task AddBlogModerator(Blog blog, ApplicationUser user)
+		public async Task AddBlogModerator(int blogId, ApplicationUser user)
 		{
-			_repository.AddBlogModerator(Mapper.Map<DAL.Interface.DTO.Blog>(blog), Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user));
+			await _repository.AddBlogModerator(blogId, Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user));
 		}
 
 		public async Task DeleteBlog(int id)
@@ -40,10 +40,9 @@ namespace BLL.Services
 			await _repository.DeleteBlog(id);
 		}
 
-		public async Task DeleteBlogModerator(Blog blog, ApplicationUser user)
+		public async Task DeleteBlogModerator(int blogId, ApplicationUser user)
 		{
-			await _repository.DeleteBlogModerator(Mapper.Map<DAL.Interface.DTO.Blog>(blog),
-				Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user));
+			await _repository.DeleteBlogModerator(blogId, Mapper.Map<DAL.Interface.DTO.ApplicationUser>(user));
 		}
 
 		public async Task<List<ApplicationUser>> GetAllBlogModerators(int blogId)
@@ -68,14 +67,17 @@ namespace BLL.Services
 
 		public async Task<ApplicationUser> GetBlogModeratorById(int blogId, string id)
 		{
-			var blog = Mapper.Map<Blog>(await _repository.GetBlogById(blogId));
-
-			return Mapper.Map<ApplicationUser>(_repository.GetBlogModeratorById(Mapper.Map<DAL.Interface.DTO.Blog>(blog), id));
+			return Mapper.Map<ApplicationUser>(await _repository.GetBlogModeratorById(blogId, id));
 		}
 
 		public async Task<BlogStyle> GetBlogStyleById(int id)
 		{
 			return Mapper.Map<BlogStyle>(await _repository.GetBlogStyleById(id));
+		}
+		
+		public bool BlogExists(int id)
+		{
+			return _repository.BlogExists(id);
 		}
 
 		public async Task UpdateBlog(int blogId, string name, string description, int blogStyleId, string imagePath)

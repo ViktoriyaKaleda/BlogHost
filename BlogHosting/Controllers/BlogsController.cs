@@ -202,6 +202,8 @@ namespace BlogHosting.Controllers
 
 			await _context.SaveChangesAsync();
 
+			var temp = blog.BlogModerators;
+
 			return PartialView("~/Views/Blogs/ModeratorsPartial.cshtml", blog.BlogModerators);
 		}
 

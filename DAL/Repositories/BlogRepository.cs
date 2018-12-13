@@ -23,8 +23,9 @@ namespace DAL.Repositories
 			await _context.SaveChangesAsync();
 		}
 
-		public async void AddBlogModerator(Blog blog, ApplicationUser user)
+		public async Task AddBlogModerator(int blogId, ApplicationUser user)
 		{
+			var blog = await GetBlogById(blogId);
 			blog.BlogModerators.Add(new BlogModerator() { Blog = blog, Moderator = user });
 			_context.Update(blog);
 			await _context.SaveChangesAsync();
@@ -46,7 +47,7 @@ namespace DAL.Repositories
 			{
 				foreach (var blogModerator in blogModerators)
 				{
-					await DeleteBlogModerator(blog, blogModerator);
+					await DeleteBlogModerator(blog.BlogId, blogModerator);
 				}
 			}
 
@@ -54,8 +55,9 @@ namespace DAL.Repositories
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task DeleteBlogModerator(Blog blog, ApplicationUser user)
+		public async Task DeleteBlogModerator(int blogId, ApplicationUser user)
 		{
+			var blog = await GetBlogById(blogId);
 			var blogModerator = await _context.BlogModerator.FirstOrDefaultAsync(m => m.BlogId == blog.BlogId && m.ModeratorId == user.Id);
 			_context.BlogModerator.Remove(blogModerator);
 			await _context.SaveChangesAsync();
@@ -76,20 +78,25 @@ namespace DAL.Repositories
 			return await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == id);
 		}
 
-		public ApplicationUser GetBlogModeratorById(Blog blog, string id)
+		public async Task<ApplicationUser> GetBlogModeratorById(int blogId, string id)
 		{
+			var blog = await GetBlogById(blogId);
 			return blog.BlogModerators.Select(m => m.Moderator).FirstOrDefault(m => m.Id == id);
 		}
 
 		public async Task<List<ApplicationUser>> GetAllBlogModerators(int blogId)
 		{
-			var blog = await _context.Blog.FirstOrDefaultAsync(m => m.BlogId == blogId);
-			return blog.BlogModerators.Select(m => m.Moderator).ToList();
+			return _context.BlogModerator.Where(m => m.BlogId == blogId).Select(m => m.Moderator).ToList();
 		}
 
 		public async Task<BlogStyle> GetBlogStyleById(int styleId)
 		{
 			return await _context.BlogStyle.FirstOrDefaultAsync(m => m.BlogStyleId == styleId);
+		}
+
+		public bool BlogExists(int id)
+		{
+			return _context.Blog.Any(e => e.BlogId == id);
 		}
 
 		public async Task UpdateBlog(int blogId, string name, string description, int blogStyleId, string imagePath)

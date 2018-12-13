@@ -16,9 +16,9 @@ namespace BLL.Interface.Interfaces
 
 		Task<ApplicationUser> GetBlogModeratorById(int blogId, string id);
 
-		Task AddBlogModerator(Blog blog, ApplicationUser user);
+		Task AddBlogModerator(int blogId, ApplicationUser user);
 
-		Task DeleteBlogModerator(Blog blog, ApplicationUser user);
+		Task DeleteBlogModerator(int blogId, ApplicationUser user);
 
 		Task<List<BlogStyle>> GetAllBlogStyles();
 
@@ -29,5 +29,7 @@ namespace BLL.Interface.Interfaces
 		Task UpdateBlog(int blogId, string name, string description, int blogStyleId, string ImagePath);
 
 		Task DeleteBlog(int id);
+
+		bool BlogExists(int id);
 	}
 }
