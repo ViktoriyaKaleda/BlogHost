@@ -17,7 +17,7 @@ namespace DAL.Repositories
 			_context = context;
 		}
 
-		public async void AddBlog(Blog blog)
+		public async Task AddBlog(Blog blog)
 		{
 			_context.Blog.Add(blog);
 			await _context.SaveChangesAsync();
