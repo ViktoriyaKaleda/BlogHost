@@ -27,7 +27,7 @@ namespace BLL.Services
 			if (blog.ImagePath == null)
 				blog.ImagePath = style.DefaultImagePath;
 
-			_repository.AddBlog(Mapper.Map<DAL.Interface.DTO.Blog>(blog));
+			await _repository.AddBlog(Mapper.Map<DAL.Interface.DTO.Blog>(blog));
 		}
 
 		public async Task AddBlogModerator(int blogId, ApplicationUser user)

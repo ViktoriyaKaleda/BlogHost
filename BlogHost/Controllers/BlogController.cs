@@ -32,7 +32,7 @@ namespace BlogHost.Controllers
 			_authorizationService = authorizationService;
 		}
 
-		public async Task<IActionResult> Index(int page = 1, string filterNumber = null)
+		public IActionResult Index(int page = 1, string filterNumber = null)
         {
 			int pageSize = 3;   // number of blogs on page
 

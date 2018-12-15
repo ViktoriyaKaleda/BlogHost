@@ -35,7 +35,7 @@
         $(document).ready(() => {
             $('#filterSelect').change(function () {
                 const filterNumber = $('#filterSelect').val();
-                const url = "/Blogs?filterNumber=" + filterNumber;
+                const url = "/Blog?filterNumber=" + filterNumber;
                 window.location.assign(url);
             });
 

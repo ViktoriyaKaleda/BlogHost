@@ -65,5 +65,23 @@ namespace BlogHost.Controllers
 
 			return PartialView("~/Views/Blog/_ModeratorsPartial.cshtml", temp);
 		}
+
+		[HttpPost("Blog/Edit/{id}/SetStyle")]
+		public async Task<IActionResult> SetStyle([FromBody] string styleId)
+		{
+			var style = await _blogService.GetBlogStyleById(Convert.ToInt32(styleId));
+			if (style == null)
+				return BadRequest();
+
+			return new ObjectResult(
+				new
+				{
+					style.BackgrounsColor,
+					style.TitlesFontColor,
+					style.TitlesFontName,
+					style.SecondColor,
+					style.DefaultImagePath
+				});
+		}
 	}
 }

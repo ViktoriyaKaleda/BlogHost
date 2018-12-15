@@ -1,5 +1,4 @@
-﻿using BLL.Interface.Entities;
-using BLL.Interface.Interfaces;
+﻿using BLL.Interface.Interfaces;
 using BLL.Services;
 using DAL;
 using DAL.Repositories;
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Threading.Tasks;
 
 namespace ConsoleTest
 {
@@ -52,8 +50,7 @@ namespace ConsoleTest
 
 			using (var context = new BlogHostingDbContext(optionsBuilder.Options))
 			{
-				var rep = new UserRepository(serviceProvider.GetRequiredService<UserManager<DAL.Interface.DTO.ApplicationUser>>()
-					, context, signInManager);
+				var rep = new UserRepository(serviceProvider.GetRequiredService<UserManager<DAL.Interface.DTO.ApplicationUser>>(), context, signInManager);
 
 				var service = new AuthenticateService(rep);
 

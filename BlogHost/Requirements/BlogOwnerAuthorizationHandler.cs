@@ -18,7 +18,7 @@ namespace BlogHost.Requirements
 		{
 			var currentUser = await _accountService.GetCurrentUser(context.User);
 
-			if (resource.Author.Id == currentUser.Id)
+			if (resource.Author.Id == currentUser?.Id)
 			{
 				context.Succeed(requirement);
 			}

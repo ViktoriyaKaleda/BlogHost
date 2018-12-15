@@ -19,7 +19,7 @@ namespace DAL.Interface.Interfaces
 
 		Task<List<ApplicationUser>> GetAllBlogModerators(int blogId);
 
-		void AddBlog(Blog blog);
+		Task AddBlog(Blog blog);
 
 		Task UpdateBlog(int blogId, string name, string description, int blogStyleId, string imagePath);
 
@@ -32,7 +32,5 @@ namespace DAL.Interface.Interfaces
 		Task DeleteBlogModerator(int blogId, ApplicationUser user);
 
 		bool BlogExists(int id);
-
-		//Task Save(Blog blog);
 	}
 }

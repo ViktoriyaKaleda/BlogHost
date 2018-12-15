@@ -24,7 +24,7 @@ namespace BlogHost.Requirements
 
 			foreach (var blogModerator in moderators)
 			{
-				if (blogModerator.Id == currentUser.Id)
+				if (blogModerator.Id == currentUser?.Id)
 					context.Succeed(requirement);
 			}
 		}
