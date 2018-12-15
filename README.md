@@ -9,7 +9,7 @@ Blog Host app allows you to:
 - searching by titles, text or tags
 - manage user accounts (admin panel)
 
-![alt text](Screenshot.png)
+<img src="Screenshot.png" width=70% height=70% />
 
 #### Realization details
 
